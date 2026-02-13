@@ -7,38 +7,56 @@
 <style>
 body{
 margin:0;
-font-family:Arial;
 background:#111;
 color:white;
-text-align:center;
+font-family:Arial;
 overflow:hidden;
 }
 
-/* SPINNER */
+/* ===== CHANCES TEXT ===== */
+#chances{
+position:fixed;
+top:10px;
+right:10px;
+font-size:14px;
+text-align:right;
+}
+
+/* ===== INVENTORY TEXT (OLD STYLE) ===== */
+#inventoryText{
+position:fixed;
+bottom:10px;
+left:10px;
+font-size:14px;
+max-width:300px;
+}
+
+/* ===== SPINNER ===== */
 #spinnerWrap{
-position:relative;
-width:90%;
-margin:40px auto;
+position:fixed;
+top:20px;
+left:50%;
+transform:translateX(-50%);
+width:900px;
+height:150px;
 overflow:hidden;
-border:4px solid white;
-height:160px;
+border:3px solid white;
 }
 
 #spinner{
 display:flex;
-transition: transform linear;
 }
 
 .card{
-min-width:160px;
-height:160px;
-background:#222;
+width:150px;
+height:150px;
 margin:0 4px;
+background:#222;
 display:flex;
+flex-direction:column;
 align-items:center;
 justify-content:center;
-flex-direction:column;
-border-radius:10px;
+border-radius:8px;
 }
 
 .card img{
@@ -57,124 +75,143 @@ font-size:40px;
 z-index:5;
 }
 
-/* BUTTONS */
-button{
-padding:12px 24px;
-margin:10px;
-font-size:18px;
-cursor:pointer;
+/* ===== SOLS RNG STYLE BUTTON AREA ===== */
+#bottomUI{
+position:fixed;
+bottom:20px;
+left:50%;
+transform:translateX(-50%);
+text-align:center;
 }
 
-/* REVEAL EFFECT */
-#reveal{
+#spinBtn{
+font-size:28px;
+padding:14px 50px;
+}
+
+#skipBtn{
+margin-top:6px;
+font-size:14px;
+padding:6px 20px;
+}
+
+/* ===== STICKMAN WORLD ===== */
+#world{
 position:fixed;
-top:0;
+bottom:120px;
 left:0;
 width:100%;
-height:100%;
-display:none;
-align-items:center;
-justify-content:center;
-font-size:50px;
-font-weight:bold;
+height:200px;
+background:#1b5e20;
+overflow:hidden;
 }
 
-/* SHAKE */
-.shake{
-animation:shake .5s;
+.tree{
+position:absolute;
+bottom:0;
+width:60px;
+height:120px;
+background:#2e7d32;
+border-radius:20px;
 }
 
-@keyframes shake{
-0%{transform:translateX(0)}
-25%{transform:translateX(10px)}
-50%{transform:translateX(-10px)}
-75%{transform:translateX(10px)}
-100%{transform:translateX(0)}
-}
-
-/* PARTICLES */
-.particle{
-position:fixed;
-width:8px;
-height:8px;
+#player{
+position:absolute;
+bottom:0;
+left:100px;
+width:30px;
+height:60px;
 background:white;
-border-radius:50%;
-pointer-events:none;
-animation:fall 1s linear forwards;
 }
 
-@keyframes fall{
-to{
-transform:translateY(400px);
-opacity:0;
+/* POPUP TEXT */
+#popup{
+position:fixed;
+top:50%;
+left:50%;
+transform:translate(-50%,-50%);
+font-size:60px;
+display:none;
 }
-}
-
 </style>
 </head>
 
 <body>
 
-<h1>Meme RNG</h1>
+<div id="chances"></div>
+<div id="inventoryText"></div>
 
 <div id="spinnerWrap">
 <div id="needle">▼</div>
 <div id="spinner"></div>
 </div>
 
-<button onclick="spin()">SPIN</button>
-<button onclick="showInventory()">Inventory</button>
+<div id="popup"></div>
 
-<div id="reveal"></div>
+<div id="world">
+<div id="player"></div>
+</div>
 
-<audio id="tickSound" src="tick.mp3"></audio>
+<div id="bottomUI">
+<button id="spinBtn" onclick="spin()">SPIN</button>
+<br>
+<button id="skipBtn" onclick="skipSpin()">Skip</button>
+</div>
+
+<audio id="tick" src="tick.mp3"></audio>
 
 <script>
 
-/* RARITIES */
+/* ===== RARITIES (LESS COMMONS) ===== */
 const rarities=[
-{name:"Common",chance:60,color:"#888"},
-{name:"Uncommon",chance:25,color:"#4caf50"},
-{name:"Rare",chance:10,color:"#2196f3"},
-{name:"Ultra",chance:4.9,color:"#9c27b0"},
-{name:"Mythic",chance:.1,color:"#ff9800"},
-{name:"Divine",chance:.01,color:"#ffd700"}
+{name:"Common",chance:45,color:"#888"},
+{name:"Uncommon",chance:30,color:"#4caf50"},
+{name:"Rare",chance:15,color:"#2196f3"},
+{name:"Ultra",chance:8,color:"#9c27b0"},
+{name:"Mythic",chance:1.9,color:"#ff9800"},
+{name:"Divine",chance:0.1,color:"#ffd700"}
 ];
 
-/* MEMES */
+/* ===== SHOW CHANCES ===== */
+document.getElementById("chances").innerHTML=
+rarities.map(r=>`${r.name}: ${r.chance}%`).join("<br>");
+
+/* ===== REAL MEMES (ADD MORE IF YOU WANT) ===== */
+const memeImages=[
+"https://i.imgflip.com/30b1gx.jpg",
+"https://i.imgflip.com/1bij.jpg",
+"https://i.imgflip.com/26am.jpg",
+"https://i.imgflip.com/2fm6x.jpg",
+"https://i.imgflip.com/3vzej.jpg"
+];
+
+/* ===== BUILD MEMES ===== */
 const memes=[];
-for(let i=0;i<300;i++){
-const r=randomRarity();
+for(let i=0;i<200;i++){
+let r=randomRarity();
 memes.push({
-name:r.name+" Meme "+i,
 rarity:r,
-img:"https://picsum.photos/seed/"+i+"/200"
+img:memeImages[i % memeImages.length]
 });
 }
 
-/* INVENTORY SAVE */
-let inventory=JSON.parse(localStorage.getItem("inv")||"[]");
-
-function saveInv(){
-localStorage.setItem("inv",JSON.stringify(inventory));
-}
-
-/* BUILD SPINNER */
+/* ===== LOOP SPINNER ===== */
 const spinner=document.getElementById("spinner");
 
 function buildSpinner(){
 spinner.innerHTML="";
-memes.forEach(m=>{
-const d=document.createElement("div");
+for(let i=0;i<memes.length*3;i++){
+let m=memes[i % memes.length];
+let d=document.createElement("div");
 d.className="card";
-d.style.boxShadow="0 0 20px "+m.rarity.color;
-d.innerHTML=`<img src="${m.img}"><div>${m.rarity.name}</div>`;
+d.style.boxShadow=`0 0 20px ${m.rarity.color}`;
+d.innerHTML=`<img src="${m.img}">`;
 spinner.appendChild(d);
-});
+}
 }
 buildSpinner();
 
-/* RNG */
+/* ===== RNG ===== */
 function randomRarity(){
 let roll=Math.random()*100;
 let total=0;
@@ -185,106 +222,119 @@ if(roll<=total)return r;
 return rarities[0];
 }
 
-/* SPIN */
+function randomMeme(){
+let r=randomRarity();
+let pool=memes.filter(m=>m.rarity.name===r.name);
+return pool[Math.floor(Math.random()*pool.length)];
+}
+
+/* ===== INVENTORY (OLD STYLE TEXT) ===== */
+let inventory=JSON.parse(localStorage.getItem("inv")||"[]");
+
+function updateInventory(){
+document.getElementById("inventoryText").innerHTML=
+"Your Stuff:<br>"+inventory.map(m=>m.rarity.name).join(", ");
+}
+updateInventory();
+
+/* ===== SPIN ===== */
 let spinning=false;
+let skip=false;
 
 function spin(){
 
 if(spinning)return;
 spinning=true;
-
-const tick=document.getElementById("tickSound");
-tick.currentTime=0;
+skip=false;
 
 let meme=randomMeme();
+let index=memes.indexOf(meme)+(memes.length);
 
-let index=memes.indexOf(meme);
-let distance=(index*168)+4000;
+let distance=index*158;
 
 spinner.style.transition="transform 5s cubic-bezier(.1,.7,.1,1)";
 spinner.style.transform=`translateX(-${distance}px)`;
 
-/* TICK SOUND LOOP */
-let tickInterval=setInterval(()=>{
-tick.currentTime=0;
-tick.play();
-},120);
+tickLoop();
 
 setTimeout(()=>{
-clearInterval(tickInterval);
-win(meme);
-spinning=false;
+finishSpin(meme);
 },5000);
 
 }
 
-/* RANDOM MEME */
-function randomMeme(){
-const r=randomRarity();
-const pool=memes.filter(m=>m.rarity.name===r.name);
-return pool[Math.floor(Math.random()*pool.length)];
+function skipSpin(){
+skip=true;
 }
 
-/* WIN */
-function win(m){
-
-inventory.push(m);
-saveInv();
-
-showReveal(m);
-submitScore(m);
-
+/* ===== SOUND ===== */
+function tickLoop(){
+let t=document.getElementById("tick");
+let int=setInterval(()=>{
+t.currentTime=0;
+t.play();
+if(!spinning)clearInterval(int);
+},120);
 }
 
-/* REVEAL FX */
-function showReveal(m){
+/* ===== FINISH ===== */
+function finishSpin(meme){
 
-const r=document.getElementById("reveal");
-r.style.display="flex";
-r.style.background=m.rarity.color;
-r.innerHTML=m.rarity.name+"!!!";
-r.classList.add("shake");
+spinning=false;
 
-for(let i=0;i<30;i++){
-particle();
-}
+inventory.push(meme);
+localStorage.setItem("inv",JSON.stringify(inventory));
+updateInventory();
 
-setTimeout(()=>{
-r.style.display="none";
-r.classList.remove("shake");
-},2000);
+showPopup(meme.rarity.name);
 
 }
 
-/* PARTICLES */
-function particle(){
-const p=document.createElement("div");
-p.className="particle";
-p.style.left=Math.random()*window.innerWidth+"px";
-p.style.top="0px";
-document.body.appendChild(p);
-setTimeout(()=>p.remove(),1000);
+/* ===== POPUP TEXT ONLY ===== */
+function showPopup(text){
+let p=document.getElementById("popup");
+p.innerText=text;
+p.style.display="block";
+setTimeout(()=>p.style.display="none",1500);
 }
 
-/* INVENTORY */
-function showInventory(){
-alert(inventory.map(m=>m.rarity.name+" "+m.name).join("\n"));
+/* ===== STICKMAN CONTROLS ===== */
+let player=document.getElementById("player");
+let px=100;
+let vy=0;
+let onGround=true;
+
+document.addEventListener("keydown",e=>{
+if(e.key==="a") px-=10;
+if(e.key==="d") px+=10;
+if(e.key==="w" && onGround){
+vy=12;
+onGround=false;
 }
-
-/* ONLINE LEADERBOARD (Firebase template) */
-function submitScore(m){
-/*
-Paste Firebase config here if you want real leaderboard
-
-Example:
-firebase.database().ref("scores").push({
-rarity:m.rarity.name,
-time:Date.now()
 });
-*/
+
+function physics(){
+vy-=0.6;
+if(!onGround){
+player.style.bottom=(parseInt(player.style.bottom||0)+vy)+"px";
+if(parseInt(player.style.bottom)<=0){
+player.style.bottom="0px";
+onGround=true;
+}
+}
+player.style.left=px+"px";
+requestAnimationFrame(physics);
+}
+physics();
+
+/* TREES */
+for(let i=0;i<6;i++){
+let t=document.createElement("div");
+t.className="tree";
+t.style.left=(i*300+200)+"px";
+document.getElementById("world").appendChild(t);
 }
 
 </script>
-
 </body>
 </html>
