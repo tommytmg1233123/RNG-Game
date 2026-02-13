@@ -40,6 +40,7 @@ body{
     justify-content:center;
     flex-direction:column;
     border-radius:10px;
+    box-shadow:0 0 10px #000;
 }
 
 .card img{
@@ -58,25 +59,50 @@ body{
     z-index:5;
 }
 
-/* BUTTONS */
+/* CONTROLS - Sol RNG style */
 #controls{
     position:fixed;
-    bottom:40px;
+    bottom:30px;
     width:100%;
     display:flex;
-    justify-content:center;
-    gap:10px;
+    flex-direction:column;
+    align-items:center;
+    gap:8px;
 }
 
-button{
-    padding:12px 24px;
-    font-size:18px;
+/* Roll button - big */
+#rollBtn{
+    padding:16px 40px;
+    font-size:20px;
+    font-weight:bold;
+    border-radius:12px;
+    background:#2196f3;
+    border:none;
+    color:white;
     cursor:pointer;
+    box-shadow:0 4px 6px rgba(0,0,0,0.5);
+    transition:0.2s;
 }
 
+#rollBtn:hover{
+    background:#1e88e5;
+}
+
+/* Skip button - small */
 #skipBtn{
-    padding:8px 16px;
+    padding:8px 24px;
     font-size:14px;
+    border-radius:8px;
+    background:#888;
+    border:none;
+    color:white;
+    cursor:pointer;
+    box-shadow:0 3px 5px rgba(0,0,0,0.4);
+    transition:0.2s;
+}
+
+#skipBtn:hover{
+    background:#666;
 }
 
 /* RARITY CHANCES */
@@ -162,7 +188,6 @@ button{
     height:80px;
     object-fit:cover;
 }
-
 </style>
 </head>
 
@@ -178,18 +203,16 @@ button{
 </div>
 
 <div id="controls">
-    <button id="spinBtn" onclick="spin()">SPIN</button>
+    <button id="rollBtn" onclick="spin()">ROLL</button>
     <button id="skipBtn" onclick="skipSpin()">SKIP</button>
 </div>
 
 <div id="reveal"></div>
-
 <div id="inventoryBack"></div>
 
 <audio id="tickSound" src="tick.mp3"></audio>
 
 <script>
-
 /* RARITIES */
 const rarities=[
     {name:"Common",chance:40,color:"#888"},
@@ -204,7 +227,7 @@ const rarities=[
 const chanceEl=document.getElementById("chances");
 chanceEl.innerHTML=rarities.map(r=>`${r.name}: ${r.chance}%`).join("<br>");
 
-/* MEMES (replace with real meme URLs) */
+/* MEMES */
 const memes=[
     {name:"Doge",rarity:rarities[0],img:"https://i.imgflip.com/4t0m5.jpg"},
     {name:"Pepe",rarity:rarities[1],img:"https://i.imgflip.com/30b1gx.jpg"},
@@ -212,10 +235,10 @@ const memes=[
     {name:"Drake Hotline",rarity:rarities[3],img:"https://i.imgflip.com/30b1gx.jpg"},
     {name:"Success Kid",rarity:rarities[4],img:"https://i.imgflip.com/1bh3.jpg"},
     {name:"Woman Yelling at Cat",rarity:rarities[5],img:"https://i.imgflip.com/345v97.jpg"},
-    // duplicate some to fill spinner
+    // duplicates to fill spinner
     {name:"Doge 2",rarity:rarities[0],img:"https://i.imgflip.com/4t0m5.jpg"},
     {name:"Pepe 2",rarity:rarities[1],img:"https://i.imgflip.com/30b1gx.jpg"},
-    {name:"Distracted Boyfriend 2",rarity:rarities[2],img:"https://i.imgflip.com/1ur9b0.jpg"},
+    {name:"Distracted Boyfriend 2",rarity:rarities[2],img:"https://i.imgflip.com/1ur9b0.jpg"}
 ];
 
 /* INVENTORY */
@@ -236,7 +259,7 @@ function buildSpinner(){
 }
 buildSpinner();
 
-/* LOOP SPINNER FIX */
+/* LOOP SPINNER */
 function getSpinnerWidth(){
     return spinner.scrollWidth;
 }
@@ -262,7 +285,7 @@ function randomMeme(){
 let spinning=false;
 
 function spin(){
-    if(spinning)return;
+    if(spinning) return;
     spinning=true;
 
     const tick=document.getElementById("tickSound");
@@ -271,7 +294,6 @@ function spin(){
     let meme=randomMeme();
     let index=memes.indexOf(meme);
 
-    // loop distance to prevent going into darkness
     const totalWidth=getSpinnerWidth();
     let distance=(index*168) % totalWidth + 4000;
 
@@ -330,8 +352,6 @@ function showInventoryBack(){
         invEl.appendChild(d);
     });
 }
-
 </script>
-
 </body>
 </html>
