@@ -14,54 +14,37 @@ body{
     overflow:hidden;
 }
 
-/* RARITY CHANCES */
-#chances{
-    position:fixed;
-    top:10px;
-    right:10px;
-    background:#222;
-    padding:10px 15px;
-    border-radius:10px;
-    border:2px solid white;
-    font-size:14px;
-    z-index:20;
-}
-
-/* SPINNER BAR */
+/* SPINNER */
 #spinnerWrap{
     position:relative;
-    width:90%;
+    width:80%;
     margin:40px auto;
     overflow:hidden;
-    border:5px solid white;
-    height:150px;
-    border-radius:25px;
-    background:#222;
+    border:4px solid white;
+    height:160px;
+    background:#000;
 }
 
-/* SPINNER */
 #spinner{
     display:flex;
-    transition:transform 5s cubic-bezier(.1,.7,.1,1);
+    transition: transform 0s linear;
 }
 
-/* CARD */
 .card{
-    min-width:150px;
-    height:150px;
+    min-width:160px;
+    height:160px;
     background:#222;
-    margin:0 6px;
+    margin:0 4px;
     display:flex;
     align-items:center;
     justify-content:center;
     flex-direction:column;
-    border-radius:20px;
+    border-radius:10px;
 }
 
 .card img{
-    width:110px;
-    height:110px;
-    border-radius:15px;
+    width:120px;
+    height:120px;
     object-fit:cover;
 }
 
@@ -72,90 +55,114 @@ body{
     left:50%;
     transform:translateX(-50%);
     font-size:40px;
-    z-index:10;
+    z-index:5;
 }
 
 /* BUTTONS */
-#spinBtn{
+#controls{
     position:fixed;
-    bottom:80px;
-    left:50%;
-    transform:translateX(-50%);
-    padding:18px 40px;
-    font-size:24px;
-    border-radius:20px;
-    border:none;
-    background:#4caf50;
-    color:white;
+    bottom:40px;
+    width:100%;
+    display:flex;
+    justify-content:center;
+    gap:10px;
+}
+
+button{
+    padding:12px 24px;
+    font-size:18px;
     cursor:pointer;
 }
 
 #skipBtn{
-    position:fixed;
-    bottom:30px;
-    left:50%;
-    transform:translateX(-50%);
-    padding:10px 20px;
-    font-size:16px;
-    border-radius:15px;
-    border:none;
-    background:#888;
-    color:white;
-    cursor:pointer;
+    padding:8px 16px;
+    font-size:14px;
 }
 
-/* REVEAL */
+/* RARITY CHANCES */
+#chances{
+    position:fixed;
+    top:10px;
+    right:10px;
+    text-align:right;
+    font-size:14px;
+}
+
+/* REVEAL TEXT */
 #reveal{
     position:fixed;
     top:50%;
     left:50%;
     transform:translate(-50%,-50%);
-    font-size:50px;
-    font-weight:bold;
     display:none;
-    text-shadow:0 0 20px white;
-    text-align:center;
-    z-index:30;
+    font-size:40px;
+    font-weight:bold;
 }
 
-#reveal img{
-    width:200px;
-    height:200px;
-    border-radius:20px;
-    margin-top:10px;
+/* SHAKE */
+.shake{
+    animation:shake .5s;
 }
 
-/* INVENTORY BAR */
-#inventory{
+@keyframes shake{
+    0%{transform:translateX(0)}
+    25%{transform:translateX(10px)}
+    50%{transform:translateX(-10px)}
+    75%{transform:translateX(10px)}
+    100%{transform:translateX(0)}
+}
+
+/* PARTICLES */
+.particle{
     position:fixed;
+    width:8px;
+    height:8px;
+    background:white;
+    border-radius:50%;
+    pointer-events:none;
+    animation:fall 1s linear forwards;
+}
+
+@keyframes fall{
+    to{
+        transform:translateY(400px);
+        opacity:0;
+    }
+}
+
+/* INVENTORY AT BACK */
+#inventoryBack{
+    position:absolute;
     bottom:0;
     left:0;
     width:100%;
-    height:90px;
-    background:#0008;
-    display:flex;
+    height:120px;
     overflow-x:auto;
-    padding:10px;
-    gap:10px;
-    z-index:15;
-}
-
-.invItem{
-    min-width:70px;
-    height:70px;
-    border-radius:10px;
-    background:#222;
     display:flex;
-    justify-content:center;
     align-items:center;
+    padding:5px;
+    background:#111;
+    border-top:2px solid #444;
 }
 
-.invItem img{
-    width:65px;
-    height:65px;
-    border-radius:10px;
+#inventoryBack .invCard{
+    width:100px;
+    height:100px;
+    margin:0 5px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    border-radius:8px;
+    box-shadow:0 0 10px #000;
+}
+
+#inventoryBack .invCard img{
+    width:80px;
+    height:80px;
     object-fit:cover;
 }
+
 </style>
 </head>
 
@@ -163,27 +170,21 @@ body{
 
 <h1>Meme RNG</h1>
 
-<div id="chances">
-<b>Rarity Chances:</b><br>
-Common — 40%<br>
-Uncommon — 30%<br>
-Rare — 20%<br>
-Ultra — 8%<br>
-Mythic — 1.5%<br>
-Divine — 0.5%
-</div>
+<div id="chances"></div>
 
 <div id="spinnerWrap">
     <div id="needle">▼</div>
     <div id="spinner"></div>
 </div>
 
-<button id="spinBtn" onclick="spin()">SPIN</button>
-<button id="skipBtn" onclick="skip()">SKIP</button>
+<div id="controls">
+    <button id="spinBtn" onclick="spin()">SPIN</button>
+    <button id="skipBtn" onclick="skipSpin()">SKIP</button>
+</div>
 
 <div id="reveal"></div>
 
-<div id="inventory"></div>
+<div id="inventoryBack"></div>
 
 <audio id="tickSound" src="tick.mp3"></audio>
 
@@ -194,45 +195,28 @@ const rarities=[
     {name:"Common",chance:40,color:"#888"},
     {name:"Uncommon",chance:30,color:"#4caf50"},
     {name:"Rare",chance:20,color:"#2196f3"},
-    {name:"Ultra",chance:8,color:"#9c27b0"},
-    {name:"Mythic",chance:1.5,color:"#ff9800"},
-    {name:"Divine",chance:0.5,color:"#ffd700"}
+    {name:"Ultra",chance:9,color:"#9c27b0"},
+    {name:"Mythic",chance:0.9,color:"#ff9800"},
+    {name:"Divine",chance:0.1,color:"#ffd700"}
 ];
 
-/* REAL MEME URLS (SAFE FOR GITHUB) */
-const memeURLs = [
-    "https://i.imgur.com/4AiXzf8.jpeg",
-    "https://i.imgur.com/0rZqgkP.jpeg",
-    "https://i.imgur.com/8pQeQKp.jpeg",
-    "https://i.imgur.com/1Q9Z1ZC.jpeg",
-    "https://i.imgur.com/7yZ8Q2B.jpeg",
-    "https://i.imgur.com/6YV2Q0v.jpeg",
-    "https://i.imgur.com/1d9Qw2m.jpeg",
-    "https://i.imgur.com/3Qe4Y8d.jpeg",
-    "https://i.imgur.com/9Yk3p4C.jpeg",
-    "https://i.imgur.com/2Xk7f8L.jpeg",
-    "https://i.imgur.com/5Qw9r1B.jpeg",
-    "https://i.imgur.com/7Jk2s3V.jpeg",
-    "https://i.imgur.com/8Lm4p2N.jpeg",
-    "https://i.imgur.com/4Wk9s5Q.jpeg",
-    "https://i.imgur.com/6Qp3v7M.jpeg",
-    "https://i.imgur.com/3Pq8n4B.jpeg",
-    "https://i.imgur.com/9Qw2k6J.jpeg",
-    "https://i.imgur.com/2Lm7p3N.jpeg",
-    "https://i.imgur.com/5Qk9s4V.jpeg",
-    "https://i.imgur.com/7Qp3v6M.jpeg"
-];
+/* SHOW RARITY CHANCES */
+const chanceEl=document.getElementById("chances");
+chanceEl.innerHTML=rarities.map(r=>`${r.name}: ${r.chance}%`).join("<br>");
 
-/* BUILD MEMES */
-let memes=[];
-for(let i=0;i<memeURLs.length;i++){
-    const r=randomRarity();
-    memes.push({
-        name:r.name+" Meme "+i,
-        rarity:r,
-        img:memeURLs[i]
-    });
-}
+/* MEMES (replace with real meme URLs) */
+const memes=[
+    {name:"Doge",rarity:rarities[0],img:"https://i.imgflip.com/4t0m5.jpg"},
+    {name:"Pepe",rarity:rarities[1],img:"https://i.imgflip.com/30b1gx.jpg"},
+    {name:"Distracted Boyfriend",rarity:rarities[2],img:"https://i.imgflip.com/1ur9b0.jpg"},
+    {name:"Drake Hotline",rarity:rarities[3],img:"https://i.imgflip.com/30b1gx.jpg"},
+    {name:"Success Kid",rarity:rarities[4],img:"https://i.imgflip.com/1bh3.jpg"},
+    {name:"Woman Yelling at Cat",rarity:rarities[5],img:"https://i.imgflip.com/345v97.jpg"},
+    // duplicate some to fill spinner
+    {name:"Doge 2",rarity:rarities[0],img:"https://i.imgflip.com/4t0m5.jpg"},
+    {name:"Pepe 2",rarity:rarities[1],img:"https://i.imgflip.com/30b1gx.jpg"},
+    {name:"Distracted Boyfriend 2",rarity:rarities[2],img:"https://i.imgflip.com/1ur9b0.jpg"},
+];
 
 /* INVENTORY */
 let inventory=[];
@@ -242,19 +226,22 @@ const spinner=document.getElementById("spinner");
 
 function buildSpinner(){
     spinner.innerHTML="";
-    for(let i=0;i<20;i++){  // repeat wheel to prevent darkness
-        memes.forEach(m=>{
-            const d=document.createElement("div");
-            d.className="card";
-            d.style.boxShadow="0 0 25px "+m.rarity.color;
-            d.innerHTML=`<img src="${m.img}"><div>${m.rarity.name}</div>`;
-            spinner.appendChild(d);
-        });
-    }
+    memes.forEach(m=>{
+        const d=document.createElement("div");
+        d.className="card";
+        d.style.boxShadow=`0 0 20px ${m.rarity.color}`;
+        d.innerHTML=`<img src="${m.img}"><div>${m.rarity.name}</div>`;
+        spinner.appendChild(d);
+    });
 }
 buildSpinner();
 
-/* RANDOM RARITY */
+/* LOOP SPINNER FIX */
+function getSpinnerWidth(){
+    return spinner.scrollWidth;
+}
+
+/* RNG */
 function randomRarity(){
     let roll=Math.random()*100;
     let total=0;
@@ -265,7 +252,6 @@ function randomRarity(){
     return rarities[0];
 }
 
-/* RANDOM MEME */
 function randomMeme(){
     const r=randomRarity();
     const pool=memes.filter(m=>m.rarity.name===r.name);
@@ -274,64 +260,75 @@ function randomMeme(){
 
 /* SPIN */
 let spinning=false;
-let skipTimeout=null;
 
 function spin(){
     if(spinning)return;
     spinning=true;
 
     const tick=document.getElementById("tickSound");
+    tick.currentTime=0;
 
     let meme=randomMeme();
     let index=memes.indexOf(meme);
 
-    let loops=30;
-    let distance=(index*162)+(loops*memes.length*162);
+    // loop distance to prevent going into darkness
+    const totalWidth=getSpinnerWidth();
+    let distance=(index*168) % totalWidth + 4000;
 
     spinner.style.transition="transform 5s cubic-bezier(.1,.7,.1,1)";
     spinner.style.transform=`translateX(-${distance}px)`;
 
-    skipTimeout=setTimeout(()=>{
+    let tickInterval=setInterval(()=>{
+        tick.currentTime=0;
+        tick.play();
+    },120);
+
+    setTimeout(()=>{
+        clearInterval(tickInterval);
         win(meme);
         spinning=false;
     },5000);
 }
 
-/* SKIP */
-function skip(){
-    if(!spinning)return;
-    clearTimeout(skipTimeout);
-    win(randomMeme());
-    spinning=false;
+/* SKIP SPIN */
+function skipSpin(){
+    if(spinning){
+        spinner.style.transition="none";
+        spinner.style.transform=`translateX(0px)`;
+        spinning=false;
+    }
 }
 
 /* WIN */
 function win(m){
     inventory.push(m);
-    updateInventory();
+    showInventoryBack();
     showReveal(m);
 }
 
-/* INVENTORY UPDATE */
-function updateInventory(){
-    const inv=document.getElementById("inventory");
-    inv.innerHTML="";
-    inventory.forEach(m=>{
-        const d=document.createElement("div");
-        d.className="invItem";
-        d.innerHTML=`<img src="${m.img}">`;
-        inv.appendChild(d);
-    });
-}
-
-/* REVEAL */
+/* REVEAL MINIMAL */
 function showReveal(m){
     const r=document.getElementById("reveal");
     r.style.display="block";
-    r.style.color=m.rarity.color;
-    r.innerHTML=`${m.rarity.name}<br><img src="${m.img}">`;
+    r.innerHTML=m.rarity.name; // just text
+    r.classList.add("shake");
+    setTimeout(()=>{
+        r.style.display="none";
+        r.classList.remove("shake");
+    },1500);
+}
 
-    setTimeout(()=>{ r.style.display="none"; },2000);
+/* INVENTORY AT BACK */
+function showInventoryBack(){
+    const invEl=document.getElementById("inventoryBack");
+    invEl.innerHTML="";
+    inventory.forEach(m=>{
+        const d=document.createElement("div");
+        d.className="invCard";
+        d.style.boxShadow=`0 0 10px ${m.rarity.color}`;
+        d.innerHTML=`<img src="${m.img}"><div>${m.rarity.name}</div>`;
+        invEl.appendChild(d);
+    });
 }
 
 </script>
