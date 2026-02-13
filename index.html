@@ -1,330 +1,332 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Meme RNG Spin Game</title>
+<title>RNG World</title>
 
 <style>
-body {
-  margin: 0;
-  overflow: hidden;
-  font-family: Arial, sans-serif;
-  background: #87CEEB;
+body{
+    margin:0;
+    overflow:hidden;
+    font-family:Arial;
 }
 
-/* ===== WORLD (BACKGROUND GAME) ===== */
-#world {
-  position: fixed;
-  inset: 0;
-  z-index: 0;
+/* ===== WORLD ===== */
+
+#world{
+    position:fixed;
+    inset:0;
+    background:#5ecbff;
+    overflow:hidden;
 }
 
-#player {
-  position: absolute;
-  bottom: 20%;
-  left: 50%;
-  width: 12px;
-  height: 35vh; /* ~3/5 screen height */
-  transform: translateX(-50%);
+.ground{
+    position:absolute;
+    bottom:0;
+    height:180px;
+    width:100%;
+    background:#4caf50;
 }
 
-.stick-head {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  border: 5px solid black;
-  margin: auto;
+.tree{
+    position:absolute;
+    bottom:180px;
+    width:40px;
+    height:100px;
+    background:#6d4c41;
+}
+.tree::after{
+    content:"";
+    position:absolute;
+    bottom:70px;
+    left:-40px;
+    width:120px;
+    height:100px;
+    background:#2e7d32;
+    border-radius:50%;
 }
 
-.stick-body {
-  width: 6px;
-  height: 60%;
-  background: black;
-  margin: auto;
+.river{
+    position:absolute;
+    bottom:0;
+    height:120px;
+    width:200px;
+    background:#2196f3;
 }
 
-/* ===== SPIN UI ===== */
-#spinArea {
-  position: fixed;
-  top: 10px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 900px;
-  max-width: 95vw;
-  z-index: 5;
+/* ===== WHEEL TOP ===== */
+
+#wheelWrap{
+    position:fixed;
+    top:20px;
+    left:50%;
+    transform:translateX(-50%);
+    width:900px;
+    height:140px;
+    overflow:hidden;
+    background:#111;
+    border:3px solid white;
+    border-radius:12px;
 }
 
-#wheelContainer {
-  position: relative;
-  height: 140px;
-  overflow: hidden;
-  border-radius: 12px;
-  background: rgba(0,0,0,0.4);
-  backdrop-filter: blur(6px);
+#wheel{
+    display:flex;
 }
 
-#wheel {
-  display: flex;
-  height: 100%;
+.item{
+    width:140px;
+    height:140px;
+    margin:0 4px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:#222;
+    border-radius:10px;
 }
 
-.segment {
-  min-width: 140px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.item img{
+    width:120px;
+    height:120px;
+    border-radius:8px;
 }
 
-.segment img {
-  width: 90px;
-  height: 90px;
-  object-fit: contain;
+/* PIN TOP */
+
+#pin{
+    position:fixed;
+    top:0px;
+    left:50%;
+    transform:translateX(-50%);
+    font-size:50px;
+    color:red;
+    z-index:10;
 }
 
-/* Needle (TOP PIN) */
-#needle {
-  position: absolute;
-  top: -10px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 0;
-  height: 0;
-  border-left: 10px solid transparent;
-  border-right: 10px solid transparent;
-  border-top: 25px solid red;
+/* ===== BUTTONS BOTTOM ===== */
+
+#ui{
+    position:fixed;
+    bottom:30px;
+    left:50%;
+    transform:translateX(-50%);
+    text-align:center;
 }
 
-/* Buttons Bottom */
-#controls {
-  position: fixed;
-  bottom: 30px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  z-index: 5;
+#spinBtn{
+    padding:16px 70px;
+    font-size:28px;
+    border-radius:14px;
+    border:none;
+    background:#00e5ff;
+    color:white;
+    cursor:pointer;
 }
 
-.spinBtn {
-  padding: 16px 40px;
-  font-size: 22px;
-  border-radius: 10px;
-  border: none;
-  cursor: pointer;
-  background: linear-gradient(180deg,#4faaff,#1c6fff);
-  color: white;
-  font-weight: bold;
+#skipBtn{
+    margin-top:8px;
+    padding:6px 25px;
 }
 
-.skipBtn {
-  padding: 8px 25px;
-  font-size: 16px;
-  border-radius: 8px;
-  border: none;
-  cursor: pointer;
-  background: #444;
-  color: white;
+/* ===== POPUP ===== */
+
+#popup{
+    position:fixed;
+    top:40%;
+    left:50%;
+    transform:translateX(-50%);
+    font-size:60px;
+    font-weight:bold;
+    display:none;
 }
 
-/* Rarity flash */
-#rarityFlash {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  opacity: 0;
-  z-index: 20;
-}
+/* FLASH */
 
-#rarityText {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%,-50%);
-  font-size: 60px;
-  font-weight: bold;
-  color: white;
-  text-shadow: 0 0 20px black;
-  opacity: 0;
-  z-index: 21;
+#flash{
+    position:fixed;
+    inset:0;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .2s;
 }
-
-#rollCounter {
-  position: fixed;
-  right: 20px;
-  top: 20px;
-  color: white;
-  font-size: 18px;
-  z-index: 10;
-}
-
 </style>
 </head>
 
 <body>
 
-<canvas id="world"></canvas>
+<div id="world">
+    <div class="ground"></div>
 
-<div id="player">
-  <div class="stick-head"></div>
-  <div class="stick-body"></div>
+    <div class="tree" style="left:400px"></div>
+    <div class="tree" style="left:900px"></div>
+
+    <div class="river" style="left:600px"></div>
+    <div class="river" style="left:1400px"></div>
 </div>
 
-<div id="spinArea">
-  <div id="wheelContainer">
-    <div id="needle"></div>
+<div id="pin">▼</div>
+
+<div id="wheelWrap">
     <div id="wheel"></div>
-  </div>
 </div>
 
-<div id="controls">
-  <button class="spinBtn" onclick="startSpin()">SPIN</button>
-  <button class="skipBtn" onclick="skipSpin()">SKIP</button>
+<div id="ui">
+    <button id="spinBtn">SPIN</button><br>
+    <button id="skipBtn">Skip</button>
 </div>
 
-<div id="rarityFlash"></div>
-<div id="rarityText"></div>
-<div id="rollCounter">Rolls: 0</div>
+<div id="popup"></div>
+<div id="flash"></div>
+
+<audio id="tick" src="tick.mp3"></audio>
 
 <script>
 
-/* ===== MEME DATA (EDIT THIS TO ADD YOUR OWN) ===== */
-const memes = [
-  {name:"Common Dog", img:"https://i.imgur.com/JqeuJ6t.png", rarity:"Common", chance:70, color:"#888"},
-  {name:"Rare Cat", img:"https://i.imgur.com/Qp9Z4KU.png", rarity:"Rare", chance:20, color:"#3b82f6"},
-  {name:"Epic Frog", img:"https://i.imgur.com/4AiXzf8.jpeg", rarity:"Epic", chance:8, color:"#a855f7"},
-  {name:"Legend Pepe", img:"https://i.imgur.com/4M34hi2.png", rarity:"Legendary", chance:1.9, color:"#f59e0b"},
-  {name:"ULTRA GOD", img:"https://i.imgur.com/V4RclNb.png", rarity:"Ultra", chance:0.1, color:"#ff0000"}
+/* ===== RNG ===== */
+
+const RARITIES=[
+    {name:"Common",chance:55,color:"#888"},
+    {name:"Rare",chance:25,color:"#2196f3"},
+    {name:"Ultra",chance:15,color:"#9c27b0"},
+    {name:"Mythic",chance:4,color:"#ff9800"},
+    {name:"Divine",chance:1,color:"#ffd700"}
 ];
 
-/* ===== BUILD WHEEL ===== */
-const wheel = document.getElementById("wheel");
-let wheelData = [];
+const MEMES=[
+    {img:"https://i.imgflip.com/30b1gx.jpg",rarity:"Common"},
+    {img:"https://i.imgflip.com/1ur9b0.jpg",rarity:"Rare"},
+    {img:"https://i.imgflip.com/2fm6x.jpg",rarity:"Ultra"}
+];
 
-memes.forEach(m=>{
-  let count = Math.max(1, Math.floor(m.chance));
-  for(let i=0;i<count;i++) wheelData.push(m);
-});
+const wheel=document.getElementById("wheel");
 
-wheelData = [...wheelData,...wheelData,...wheelData,...wheelData];
+function buildWheel(){
+    wheel.innerHTML="";
+    for(let i=0;i<400;i++){
+        let m=MEMES[i%MEMES.length];
+        let r=RARITIES.find(x=>x.name===m.rarity);
 
-wheelData.forEach(m=>{
-  const seg = document.createElement("div");
-  seg.className="segment";
-  seg.style.boxShadow = `inset 0 0 25px ${m.color}`;
-  seg.innerHTML=`<img src="${m.img}">`;
-  wheel.appendChild(seg);
-});
+        let d=document.createElement("div");
+        d.className="item";
+        d.style.boxShadow=`0 0 20px ${r.color}`;
+        d.innerHTML=`<img src="${m.img}">`;
 
-/* ===== SPIN LOGIC ===== */
-let spinning=false;
-let offset=0;
-let speed=0;
-let target=0;
-let rolls=0;
+        wheel.appendChild(d);
+    }
+}
+buildWheel();
 
-function weightedPick(){
-  let total=memes.reduce((a,b)=>a+b.chance,0);
-  let r=Math.random()*total;
-  let sum=0;
-  for(let m of memes){
-    sum+=m.chance;
-    if(r<=sum) return m;
-  }
-  return memes[0];
+function pick(){
+    let roll=Math.random()*100;
+    let sum=0;
+    for(let r of RARITIES){
+        sum+=r.chance;
+        if(roll<=sum){
+            let pool=MEMES.filter(m=>m.rarity===r.name);
+            return pool[Math.floor(Math.random()*pool.length)];
+        }
+    }
+    return MEMES[0];
 }
 
+/* ===== SOL'S STYLE SPIN ===== */
+
+let spinning=false;
+let tickInterval;
+let spinStart;
+
+document.getElementById("spinBtn").onclick=startSpin;
+document.getElementById("skipBtn").onclick=skipSpin;
+
 function startSpin(){
-  if(spinning) return;
-  spinning=true;
-  speed=80+Math.random()*40;
-  const result=weightedPick();
-  target = wheelData.indexOf(result) * 140 + 5000;
-  animateSpin(result);
+
+    if(spinning) return;
+    spinning=true;
+
+    let tick=document.getElementById("tick");
+
+    wheel.style.transition="none";
+    wheel.style.transform="translateX(0px)";
+    wheel.offsetHeight;
+
+    let duration=6000;
+    spinStart=performance.now();
+
+    startTickSound();
+
+    function anim(t){
+
+        let p=(t-spinStart)/duration;
+        if(p>1)p=1;
+
+        let ease=1-Math.pow(1-p,3);
+        let move=ease*9000;
+
+        wheel.style.transform=`translateX(-${move}px)`;
+
+        updateTickSpeed(p);
+
+        if(p<1 && spinning){
+            requestAnimationFrame(anim);
+        }else{
+            finishSpin();
+        }
+    }
+
+    requestAnimationFrame(anim);
+}
+
+function startTickSound(){
+    let t=document.getElementById("tick");
+    tickInterval=setInterval(()=>{
+        t.currentTime=0;
+        t.play();
+    },60);
+}
+
+function updateTickSpeed(progress){
+    clearInterval(tickInterval);
+    let speed=60+(progress*300);
+    tickInterval=setInterval(()=>{
+        let t=document.getElementById("tick");
+        t.currentTime=0;
+        t.play();
+    },speed);
 }
 
 function skipSpin(){
-  if(!spinning) return;
-  offset = target;
+    if(!spinning)return;
+    spinning=false;
+    finishSpin();
 }
 
-function animateSpin(result){
-  function frame(){
-    offset += speed;
-    speed *= 0.985;
-    wheel.style.transform=`translateX(${-offset}px)`;
+function finishSpin(){
 
-    if(speed<0.5 || offset>=target){
-      spinning=false;
-      finishSpin(result);
-      return;
-    }
-    requestAnimationFrame(frame);
-  }
-  frame();
+    clearInterval(tickInterval);
+
+    let meme=pick();
+    let r=RARITIES.find(x=>x.name===meme.rarity);
+
+    showPopup(r);
+    flash(r.color);
+
+    spinning=false;
 }
 
-function finishSpin(m){
-  rolls++;
-  document.getElementById("rollCounter").innerText="Rolls: "+rolls;
-
-  const flash=document.getElementById("rarityFlash");
-  const text=document.getElementById("rarityText");
-
-  flash.style.background=m.color;
-  flash.style.opacity=0.5;
-  text.innerText=m.rarity;
-  text.style.opacity=1;
-
-  setTimeout(()=>{
-    flash.style.opacity=0;
-    text.style.opacity=0;
-  },1500);
+function showPopup(r){
+    let p=document.getElementById("popup");
+    p.innerText=r.name;
+    p.style.color=r.color;
+    p.style.display="block";
+    setTimeout(()=>p.style.display="none",1500);
 }
 
-/* ===== WORLD LOOP BACKGROUND ===== */
-const canvas=document.getElementById("world");
-const ctx=canvas.getContext("2d");
-
-function resize(){
-  canvas.width=window.innerWidth;
-  canvas.height=window.innerHeight;
+function flash(color){
+    let f=document.getElementById("flash");
+    f.style.background=color;
+    f.style.opacity="0.5";
+    setTimeout(()=>f.style.opacity="0",300);
 }
-resize(); window.addEventListener("resize",resize);
-
-let camX=0;
-let keys={};
-
-document.addEventListener("keydown",e=>keys[e.key.toLowerCase()]=true);
-document.addEventListener("keyup",e=>keys[e.key.toLowerCase()]=false);
-
-function worldLoop(){
-  if(keys['a']) camX-=5;
-  if(keys['d']) camX+=5;
-
-  ctx.fillStyle="#87CEEB";
-  ctx.fillRect(0,0,canvas.width,canvas.height);
-
-  for(let i=-2000;i<2000;i+=300){
-    let x=i-camX;
-
-    ctx.fillStyle="#3c9a3c";
-    ctx.fillRect(x,canvas.height-120,60,120);
-
-    ctx.beginPath();
-    ctx.arc(x+30,canvas.height-140,60,0,Math.PI*2);
-    ctx.fill();
-
-    ctx.fillStyle="#4aa3ff";
-    ctx.fillRect(x+150,canvas.height-60,200,40);
-  }
-
-  requestAnimationFrame(worldLoop);
-}
-worldLoop();
 
 </script>
-
 </body>
 </html>
