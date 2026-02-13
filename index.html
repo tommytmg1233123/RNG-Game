@@ -2,51 +2,121 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Meme RNG</title>
+<title>Stick RNG</title>
 
 <style>
 body{
 margin:0;
-background:#0f0f0f;
-font-family:Arial;
-color:white;
 overflow:hidden;
+font-family:Arial;
 }
 
-/* ===== TOP INFO ===== */
+/* ===== SKY ===== */
 
-#topInfo{
+#sky{
 position:fixed;
-top:10px;
-right:10px;
-background:#000a;
-padding:10px;
-border-radius:10px;
-font-size:14px;
+inset:0;
+background:#5ecbff;
 }
 
-#rollCounter{
-position:fixed;
-top:10px;
-left:10px;
-background:#000a;
-padding:10px;
-border-radius:10px;
+/* ===== CLOUD ===== */
+
+#cloud{
+position:absolute;
+top:80px;
+right:200px;
+width:120px;
+height:50px;
+background:white;
+border-radius:50px;
 }
 
-/* ===== SPINNER ===== */
+/* ===== PLATFORM ===== */
+
+#platform{
+position:absolute;
+left:50%;
+bottom:120px;
+transform:translateX(-50%);
+width:400px;
+height:80px;
+}
+
+#grass{
+height:20px;
+background:#3cff00;
+}
+
+#dirt{
+height:60px;
+background:#8b5a2b;
+border-bottom-left-radius:20px;
+border-bottom-right-radius:20px;
+}
+
+/* ===== STICKMAN ===== */
+
+#player{
+position:absolute;
+left:50%;
+bottom:200px;
+transform:translateX(-50%);
+width:40px;
+height:80px;
+}
+
+.line{
+position:absolute;
+background:black;
+}
+
+.head{
+width:22px;
+height:22px;
+border:3px solid black;
+border-radius:50%;
+background:white;
+left:9px;
+}
+
+.body{
+width:4px;
+height:35px;
+left:18px;
+top:24px;
+}
+
+.arm{
+width:4px;
+height:25px;
+top:28px;
+}
+
+.arm.left{ left:5px; transform:rotate(30deg); }
+.arm.right{ right:5px; transform:rotate(-30deg); }
+
+.leg{
+width:4px;
+height:30px;
+top:55px;
+}
+
+.leg.left{ left:12px; transform:rotate(5deg); }
+.leg.right{ right:12px; transform:rotate(-5deg); }
+
+/* ===== SPINNER TOP ===== */
 
 #spinnerWrap{
 position:fixed;
-top:80px;
+top:20px;
 left:50%;
 transform:translateX(-50%);
 width:900px;
-height:150px;
+height:140px;
 overflow:hidden;
+background:#111;
 border:3px solid white;
 border-radius:12px;
-background:#111;
 }
 
 #spinner{
@@ -54,13 +124,12 @@ display:flex;
 }
 
 .card{
-width:150px;
-height:150px;
+width:140px;
+height:140px;
 margin:0 4px;
 display:flex;
 align-items:center;
 justify-content:center;
-flex-direction:column;
 background:#222;
 border-radius:10px;
 }
@@ -72,63 +141,56 @@ object-fit:cover;
 border-radius:8px;
 }
 
-/* ===== RED PIN ===== */
+/* ===== NEEDLE ===== */
 
 #needle{
-position:absolute;
-top:60px;
+position:fixed;
+top:120px;
 left:50%;
 transform:translateX(-50%);
 font-size:40px;
 color:red;
-z-index:5;
 }
 
-/* ===== SOLS STYLE UI ===== */
+/* ===== BUTTONS ===== */
 
-#bottomUI{
+#buttons{
 position:fixed;
-bottom:30px;
+top:170px;
 left:50%;
 transform:translateX(-50%);
 text-align:center;
 }
 
 #spinBtn{
-background:linear-gradient(#00e5ff,#0094ff);
+padding:15px 60px;
+font-size:26px;
 border:none;
-padding:18px 70px;
-font-size:28px;
-border-radius:16px;
+border-radius:14px;
+background:#00e5ff;
 color:white;
 cursor:pointer;
-box-shadow:0 0 25px #00e5ff;
 }
 
 #skipBtn{
-margin-top:8px;
-background:#333;
-border:none;
-padding:6px 24px;
+margin-top:6px;
+padding:6px 20px;
 font-size:14px;
-border-radius:10px;
-color:white;
-cursor:pointer;
 }
 
-/* ===== POPUP TEXT ===== */
+/* ===== POPUP ===== */
 
 #popup{
 position:fixed;
-top:35%;
+top:40%;
 left:50%;
 transform:translateX(-50%);
-font-size:70px;
+font-size:60px;
 font-weight:bold;
 display:none;
 }
 
-/* ===== FLASH OVERLAY ===== */
+/* ===== FLASH ===== */
 
 #flash{
 position:fixed;
@@ -143,108 +205,122 @@ transition:opacity .3s;
 
 <body>
 
-<div id="rollCounter">Rolls: 0</div>
-<div id="topInfo"></div>
+<div id="sky">
+<div id="cloud"></div>
 
-<div id="needle">▼</div>
+<div id="platform">
+<div id="grass"></div>
+<div id="dirt"></div>
+</div>
+
+<div id="player">
+<div class="head"></div>
+<div class="body line"></div>
+<div class="arm left line"></div>
+<div class="arm right line"></div>
+<div class="leg left line"></div>
+<div class="leg right line"></div>
+</div>
+</div>
 
 <div id="spinnerWrap">
 <div id="spinner"></div>
 </div>
 
-<div id="popup"></div>
-<div id="flash"></div>
+<div id="needle">▼</div>
 
-<div id="bottomUI">
+<div id="buttons">
 <button id="spinBtn">SPIN</button><br>
 <button id="skipBtn">Skip</button>
 </div>
 
+<div id="popup"></div>
+<div id="flash"></div>
+
 <script>
 
-/* ===== CUSTOM RARITIES (EDIT THIS) ===== */
+/* ===== JUMP ===== */
+
+let vel=0;
+let grounded=true;
+let player=document.getElementById("player");
+
+document.addEventListener("keydown",e=>{
+if(e.code==="Space" && grounded){
+vel=14;
+grounded=false;
+}
+});
+
+function jumpLoop(){
+let bottom=parseFloat(player.style.bottom||"200");
+
+vel-=0.7;
+bottom+=vel;
+
+if(bottom<=200){
+bottom=200;
+vel=0;
+grounded=true;
+}
+
+player.style.bottom=bottom+"px";
+requestAnimationFrame(jumpLoop);
+}
+jumpLoop();
+
+/* ===== RNG ===== */
 
 const RARITIES=[
-{name:"Common",chance:45,color:"#888"},
-{name:"Uncommon",chance:30,color:"#4caf50"},
-{name:"Rare",chance:15,color:"#2196f3"},
-{name:"Ultra",chance:8,color:"#9c27b0"},
-{name:"Mythic",chance:1.9,color:"#ff9800"},
-{name:"Divine",chance:0.1,color:"#ffd700"}
+{name:"Common",chance:50,color:"#888"},
+{name:"Rare",chance:30,color:"#2196f3"},
+{name:"Ultra",chance:15,color:"#9c27b0"},
+{name:"Mythic",chance:4,color:"#ff9800"},
+{name:"Divine",chance:1,color:"#ffd700"}
 ];
 
-/* ===== CUSTOM MEMES (ADD YOUR OWN HERE) ===== */
-
-const CUSTOM_MEMES=[
-{
-name:"Drake Meme",
-img:"https://i.imgflip.com/30b1gx.jpg",
-rarity:"Common"
-},
-{
-name:"Distracted Boyfriend",
-img:"https://i.imgflip.com/1ur9b0.jpg",
-rarity:"Rare"
-}
+const MEMES=[
+{img:"https://i.imgflip.com/30b1gx.jpg",rarity:"Common"},
+{img:"https://i.imgflip.com/1ur9b0.jpg",rarity:"Rare"},
+{img:"https://i.imgflip.com/2fm6x.jpg",rarity:"Ultra"}
 ];
 
-/* ===== SHOW CHANCES ===== */
-
-document.getElementById("topInfo").innerHTML=
-RARITIES.map(r=>`${r.name}: ${r.chance}%`).join("<br>");
-
-/* ===== BUILD MEME POOL ===== */
-
-const MEMES=CUSTOM_MEMES;
-
-/* ===== SPINNER BUILD ===== */
+/* ===== BUILD WHEEL ===== */
 
 const spinner=document.getElementById("spinner");
 
-function buildSpinner(){
+function buildWheel(){
 spinner.innerHTML="";
-for(let i=0;i<MEMES.length*6;i++){
-let m=MEMES[i % MEMES.length];
-let rarity=RARITIES.find(r=>r.name===m.rarity);
+for(let i=0;i<200;i++){
+let m=MEMES[i%MEMES.length];
+let r=RARITIES.find(x=>x.name===m.rarity);
 
 let d=document.createElement("div");
 d.className="card";
-d.style.boxShadow=`0 0 20px ${rarity.color}`;
+d.style.boxShadow=`0 0 20px ${r.color}`;
 d.innerHTML=`<img src="${m.img}">`;
 
 spinner.appendChild(d);
 }
 }
-buildSpinner();
+buildWheel();
 
-/* ===== RNG ===== */
+/* ===== RNG PICK ===== */
 
-function randomRarity(){
+function pick(){
 let roll=Math.random()*100;
-let total=0;
+let sum=0;
 for(let r of RARITIES){
-total+=r.chance;
-if(roll<=total) return r;
-}
-return RARITIES[0];
-}
-
-function randomMeme(){
-let r=randomRarity();
+sum+=r.chance;
+if(roll<=sum){
 let pool=MEMES.filter(m=>m.rarity===r.name);
 return pool[Math.floor(Math.random()*pool.length)];
 }
-
-/* ===== ROLL COUNTER SAVE ===== */
-
-let rolls=parseInt(localStorage.getItem("rolls")||0);
-updateRolls();
-
-function updateRolls(){
-document.getElementById("rollCounter").innerText="Rolls: "+rolls;
+}
+return MEMES[0];
 }
 
-/* ===== SPIN SYSTEM ===== */
+/* ===== SPIN ===== */
 
 let spinning=false;
 let spinTimeout;
@@ -257,53 +333,42 @@ function startSpin(){
 if(spinning) return;
 spinning=true;
 
-rolls++;
-localStorage.setItem("rolls",rolls);
-updateRolls();
+spinner.style.transition="none";
+spinner.style.transform="translateX(0px)";
+spinner.offsetHeight;
 
-let meme=randomMeme();
-let index=MEMES.indexOf(meme)+(MEMES.length*2);
-let distance=index*158;
+let meme=pick();
+let index=Math.floor(Math.random()*100)+80;
+let dist=index*150;
 
 spinner.style.transition="transform 5s cubic-bezier(.1,.7,.1,1)";
-spinner.style.transform=`translateX(-${distance}px)`;
+spinner.style.transform=`translateX(-${dist}px)`;
 
 spinTimeout=setTimeout(()=>{
 finishSpin(meme);
 },5000);
-
 }
 
 function skipSpin(){
 if(!spinning) return;
 clearTimeout(spinTimeout);
-let meme=randomMeme();
-finishSpin(meme);
+finishSpin(pick());
 }
 
 function finishSpin(meme){
-
 spinning=false;
-
-let rarity=RARITIES.find(r=>r.name===meme.rarity);
-
-showPopup(rarity);
-flash(rarity.color);
-
+let r=RARITIES.find(x=>x.name===meme.rarity);
+showPopup(r);
+flash(r.color);
 }
 
-/* ===== POPUP ===== */
-
-function showPopup(rarity){
+function showPopup(r){
 let p=document.getElementById("popup");
-p.innerText=rarity.name;
-p.style.color=rarity.color;
+p.innerText=r.name;
+p.style.color=r.color;
 p.style.display="block";
-
 setTimeout(()=>p.style.display="none",1500);
 }
-
-/* ===== FLASH ===== */
 
 function flash(color){
 let f=document.getElementById("flash");
