@@ -1,272 +1,173 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Meme RNG Game</title>
+import React, { useEffect, useRef, useState } from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { motion } from "framer-motion";
 
-<style>
-body{
-    background:#0a0a0a;
-    color:white;
-    font-family:Arial;
-    text-align:center;
-}
+// --- CONFIG ---
 
-#spinner{
-    width:700px;
-    height:160px;
-    margin:40px auto;
-    overflow:hidden;
-    border:4px solid white;
-    border-radius:18px;
-    position:relative;
-    background:#111;
-}
-
-#needle{
-    position:absolute;
-    left:50%;
-    top:-18px;
-    transform:translateX(-50%);
-    border-left:18px solid transparent;
-    border-right:18px solid transparent;
-    border-top:36px solid red;
-}
-
-#strip{
-    display:flex;
-    position:absolute;
-    left:0;
-}
-
-.item{
-    width:160px;
-    height:160px;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-}
-
-.item img{
-    width:120px;
-    height:120px;
-    object-fit:cover;
-    border-radius:10px;
-}
-
-.common{ box-shadow:0 0 10px #666 inset; }
-.rare{ box-shadow:0 0 20px #0099ff inset; }
-.epic{ box-shadow:0 0 25px #aa00ff inset; }
-.legendary{ box-shadow:0 0 30px gold inset; }
-.ultra{ box-shadow:0 0 40px red inset; }
-
-button{
-    padding:15px 30px;
-    font-size:20px;
-    margin:10px;
-    border:none;
-    border-radius:10px;
-    cursor:pointer;
-}
-
-#spinBtn{ background:#00ccff; }
-#skipBtn{ background:#ff4444; }
-</style>
-</head>
-
-<body>
-
-<h1>Meme RNG Spin</h1>
-
-<div id="spinner">
-    <div id="needle"></div>
-    <div id="strip"></div>
-</div>
-
-<button id="spinBtn">SPIN</button>
-<button id="skipBtn">SKIP</button>
-
-<div id="result"></div>
-
-<h3>Saved Best Rolls</h3>
-<ul id="historyList"></ul>
-
-<script>
-
-/* ⭐ MASS MEME DATABASE */
-
-/* ADD AS MANY AS YOU WANT HERE */
-const memePools = {
-
-common:[
-"https://i.imgflip.com/30b1gx.jpg",
-"https://i.imgflip.com/1bij.jpg",
-"https://i.imgflip.com/26am.jpg",
-"https://i.imgflip.com/2fm6x.jpg",
-"https://i.imgflip.com/4t0m5.jpg"
-],
-
-rare:[
-"https://i.imgflip.com/3vzej.jpg",
-"https://i.imgflip.com/1otk96.jpg",
-"https://i.imgflip.com/9ehk.jpg"
-],
-
-epic:[
-"https://i.imgflip.com/54hjww.jpg",
-"https://i.imgflip.com/5c7lwq.jpg"
-],
-
-legendary:[
-"https://i.imgflip.com/5w3z0n.jpg"
-],
-
-ultra:[
-"https://i.imgflip.com/6kq6pl.jpg"
-]
-
-};
-
-/* RARITY TABLE */
-const rarities = [
-{ name:"Common", chance:0.60, class:"common", pool:"common" },
-{ name:"Rare", chance:0.25, class:"rare", pool:"rare" },
-{ name:"Epic", chance:0.10, class:"epic", pool:"epic" },
-{ name:"Legendary", chance:0.039, class:"legendary", pool:"legendary" },
-{ name:"GOD", chance:0.001, class:"ultra", pool:"ultra" }
+const RARITIES = [
+  { name: "Common", chance: 60, glow: "shadow-none" },
+  { name: "Uncommon", chance: 25, glow: "shadow-[0_0_25px_rgba(0,255,0,0.6)]" },
+  { name: "Rare", chance: 10, glow: "shadow-[0_0_25px_rgba(0,150,255,0.7)]" },
+  { name: "Ultra Rare", chance: 4.9, glow: "shadow-[0_0_30px_rgba(180,0,255,0.8)]" },
+  { name: "Mythic", chance: 0.1, glow: "shadow-[0_0_40px_rgba(255,215,0,1)]" },
+  { name: "Divine", chance: 0.01, glow: "shadow-[0_0_45px_rgba(255,255,255,1)]" }
 ];
 
-let history = JSON.parse(localStorage.getItem("rngHistory")) || [];
-let spinning=false;
-let stripPos=0;
-let animation;
-
-updateHistoryUI();
-
-function saveHistory(){
-localStorage.setItem("rngHistory", JSON.stringify(history));
-}
-
-function randomFrom(array){
-return array[Math.floor(Math.random()*array.length)];
-}
-
-function roll(){
-let r=Math.random();
-let total=0;
-
-for(let rar of rarities){
-total+=rar.chance;
-if(r<=total){
-return {
-rarity:rar,
-img:randomFrom(memePools[rar.pool])
-};
-}
-}
-}
-
-/* STRIP CREATION */
-function makeStrip(){
-const strip=document.getElementById("strip");
-strip.innerHTML="";
-
-for(let i=0;i<180;i++){
-
-let rar=randomFrom(rarities);
-let img=randomFrom(memePools[rar.pool]);
-
-let div=document.createElement("div");
-div.className="item "+rar.class;
-div.innerHTML=`<img src="${img}"><div>${rar.name}</div>`;
-
-strip.appendChild(div);
-}
-}
-
-/* ROBLOX STYLE SPIN */
-function spinTo(targetIndex){
-const strip=document.getElementById("strip");
-const width=strip.children[0].offsetWidth;
-const centerOffset=(700/2)-(width/2);
-
-const extraDistance=5000;
-const end=-(targetIndex*width)+centerOffset-extraDistance;
-
-const duration=4200;
-const start=performance.now();
-
-spinning=true;
-
-function frame(t){
-let progress=(t-start)/duration;
-if(progress>1) progress=1;
-
-let ease=1-Math.pow(1-progress,5);
-
-strip.style.left=stripPos+(end-stripPos)*ease+"px";
-
-if(progress<1 && spinning){
-animation=requestAnimationFrame(frame);
-}else{
-spinning=false;
-stripPos=parseFloat(strip.style.left)||0;
-finishRoll(targetIndex);
-}
-}
-animation=requestAnimationFrame(frame);
-}
-
-function finishRoll(index){
-const strip=document.getElementById("strip");
-const name=strip.children[index].innerText;
-const img=strip.children[index].querySelector("img").src;
-
-document.getElementById("result").innerHTML=
-`<h2>${name}</h2><img src="${img}" width="180">`;
-
-history.push({name,img});
-saveHistory();
-updateHistoryUI();
-}
-
-function updateHistoryUI(){
-const list=document.getElementById("historyList");
-list.innerHTML="";
-history.forEach(h=>{
-let li=document.createElement("li");
-li.innerText=h.name;
-list.appendChild(li);
+// Hundreds of meme placeholders (replace URLs with real ones if wanted)
+const MEMES = Array.from({ length: 300 }).map((_, i) => {
+  const rarity = weightedRandomRarity();
+  return {
+    id: i,
+    name: `Meme #${i + 1}`,
+    img: `https://picsum.photos/seed/meme${i}/300/300`,
+    rarity
+  };
 });
+
+function weightedRandomRarity() {
+  const total = RARITIES.reduce((a, r) => a + r.chance, 0);
+  let rand = Math.random() * total;
+  for (const r of RARITIES) {
+    if (rand < r.chance) return r;
+    rand -= r.chance;
+  }
+  return RARITIES[0];
 }
 
-document.getElementById("spinBtn").onclick=()=>{
-if(spinning) return;
+function weightedRandomMeme() {
+  const roll = Math.random() * 100;
+  let cumulative = 0;
+  for (const rarity of RARITIES) {
+    cumulative += rarity.chance;
+    if (roll <= cumulative) {
+      const pool = MEMES.filter(m => m.rarity.name === rarity.name);
+      return pool[Math.floor(Math.random() * pool.length)] || MEMES[0];
+    }
+  }
+  return MEMES[0];
+}
 
-makeStrip();
-let result=roll();
+export default function MemeWheelApp() {
+  const [rotation, setRotation] = useState(0);
+  const [spinning, setSpinning] = useState(false);
+  const [currentMeme, setCurrentMeme] = useState(null);
+  const [inventory, setInventory] = useState([]);
+  const [showInventory, setShowInventory] = useState(false);
+  const [showLeaderboard, setShowLeaderboard] = useState(false);
 
-const strip=document.getElementById("strip");
+  const spinSoundRef = useRef(null);
 
-let target=[...strip.children].findIndex(c=>
-c.innerText.includes(result.rarity.name)
-);
+  // --- LOAD SAVE ---
+  useEffect(() => {
+    const savedInv = localStorage.getItem("memeInventory");
+    if (savedInv) setInventory(JSON.parse(savedInv));
+  }, []);
 
-if(target<0) target=0;
+  // --- SAVE ---
+  useEffect(() => {
+    localStorage.setItem("memeInventory", JSON.stringify(inventory));
+  }, [inventory]);
 
-spinTo(target);
-};
+  const spin = () => {
+    if (spinning) return;
+    setSpinning(true);
 
-document.getElementById("skipBtn").onclick=()=>{
-if(!spinning) return;
-spinning=false;
-cancelAnimationFrame(animation);
-};
+    if (spinSoundRef.current) {
+      spinSoundRef.current.currentTime = 0;
+      spinSoundRef.current.play();
+    }
 
-</script>
+    const meme = weightedRandomMeme();
 
-</body>
-</html>
+    const extraSpins = 8 + Math.random() * 4; // longer spin
+    const degrees = extraSpins * 360 + Math.random() * 360;
 
+    const newRotation = rotation + degrees; // ALWAYS same direction
+
+    setRotation(newRotation);
+
+    setTimeout(() => {
+      setCurrentMeme(meme);
+      setInventory(prev => {
+        if (!prev.find(p => p.id === meme.id)) return [...prev, meme];
+        return prev;
+      });
+      setSpinning(false);
+    }, 4500); // longer spin duration
+  };
+
+  const sortedInventory = [...inventory].sort((a, b) => {
+    return (
+      RARITIES.findIndex(r => r.name === b.rarity.name) -
+      RARITIES.findIndex(r => r.name === a.rarity.name)
+    );
+  });
+
+  return (
+    <div className="min-h-screen bg-neutral-950 text-white flex">
+
+      {/* Sounds */}
+      <audio ref={spinSoundRef} src="/sounds/spin.mp3" preload="auto" />
+
+      {/* Left Sidebar */}
+      <div className="w-40 p-4 flex flex-col gap-3">
+        <Button onClick={() => setShowLeaderboard(true)}>Leaderboard</Button>
+        <Button onClick={() => setShowInventory(true)}>Inventory</Button>
+      </div>
+
+      {/* Main */}
+      <div className="flex-1 flex flex-col items-center justify-center gap-6">
+
+        <motion.div
+          animate={{ rotate: rotation }}
+          transition={{ duration: 4.5, ease: [0.1, 0.7, 0.2, 1] }}
+          className="w-72 h-72 rounded-full border-4 border-white flex items-center justify-center bg-neutral-800"
+        >
+          SPIN
+        </motion.div>
+
+        <Button onClick={spin} disabled={spinning} className="text-lg px-10 py-6">
+          {spinning ? "Spinning..." : "Spin"}
+        </Button>
+
+        {currentMeme && (
+          <Card className={`w-64 ${currentMeme.rarity.glow}`}>
+            <CardContent className="p-3 flex flex-col items-center gap-2">
+              <img src={currentMeme.img} className="rounded-xl" />
+              <div>{currentMeme.name}</div>
+              <div className="text-sm opacity-70">{currentMeme.rarity.name}</div>
+            </CardContent>
+          </Card>
+        )}
+
+      </div>
+
+      {/* Inventory Modal */}
+      {showInventory && (
+        <div className="fixed inset-0 bg-black/80 p-10 overflow-auto">
+          <Button onClick={() => setShowInventory(false)}>Close</Button>
+          <div className="grid grid-cols-4 gap-4 mt-6">
+            {sortedInventory.map(m => (
+              <Card key={m.id} className={m.rarity.glow}>
+                <CardContent className="p-2">
+                  <img src={m.img} className="rounded-lg" />
+                  <div className="text-xs">{m.rarity.name}</div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Leaderboard Modal */}
+      {showLeaderboard && (
+        <div className="fixed inset-0 bg-black/80 p-10">
+          <Button onClick={() => setShowLeaderboard(false)}>Close</Button>
+          <div className="mt-6 text-lg">Coming soon (connect to backend later)</div>
+        </div>
+      )}
+
+    </div>
+  );
+}
