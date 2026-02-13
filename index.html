@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Stick RNG</title>
+<title>RNG World</title>
 
 <style>
 body{
@@ -11,58 +11,57 @@ overflow:hidden;
 font-family:Arial;
 }
 
-/* ===== SKY ===== */
+/* ===== WORLD ===== */
 
-#sky{
+#world{
 position:fixed;
 inset:0;
 background:#5ecbff;
+overflow:hidden;
 }
 
-/* ===== CLOUD ===== */
-
-#cloud{
+.ground{
 position:absolute;
-top:80px;
-right:200px;
+bottom:0;
+height:180px;
+width:100%;
+background:#4caf50;
+}
+
+.tree{
+position:absolute;
+bottom:180px;
+width:40px;
+height:100px;
+background:#6d4c41;
+}
+.tree::after{
+content:"";
+position:absolute;
+bottom:70px;
+left:-40px;
 width:120px;
-height:50px;
-background:white;
-border-radius:50px;
+height:100px;
+background:#2e7d32;
+border-radius:50%;
 }
 
-/* ===== PLATFORM ===== */
-
-#platform{
+.river{
 position:absolute;
-left:50%;
-bottom:120px;
-transform:translateX(-50%);
-width:400px;
-height:80px;
+bottom:0;
+height:120px;
+width:200px;
+background:#2196f3;
 }
 
-#grass{
-height:20px;
-background:#3cff00;
-}
-
-#dirt{
-height:60px;
-background:#8b5a2b;
-border-bottom-left-radius:20px;
-border-bottom-right-radius:20px;
-}
-
-/* ===== STICKMAN ===== */
+/* ===== PLAYER ===== */
 
 #player{
 position:absolute;
-left:50%;
+width:30px;
+height:70px;
 bottom:200px;
-transform:translateX(-50%);
-width:40px;
-height:80px;
+left:200px;
 }
 
 .line{
@@ -71,42 +70,42 @@ background:black;
 }
 
 .head{
-width:22px;
-height:22px;
+width:20px;
+height:20px;
 border:3px solid black;
 border-radius:50%;
 background:white;
-left:9px;
+left:5px;
 }
 
 .body{
 width:4px;
-height:35px;
-left:18px;
-top:24px;
+height:30px;
+left:13px;
+top:22px;
 }
 
 .arm{
 width:4px;
-height:25px;
-top:28px;
+height:20px;
+top:25px;
 }
 
-.arm.left{ left:5px; transform:rotate(30deg); }
-.arm.right{ right:5px; transform:rotate(-30deg); }
+.arm.left{ left:0; transform:rotate(30deg); }
+.arm.right{ right:0; transform:rotate(-30deg); }
 
 .leg{
 width:4px;
-height:30px;
-top:55px;
+height:25px;
+top:45px;
 }
 
-.leg.left{ left:12px; transform:rotate(5deg); }
-.leg.right{ right:12px; transform:rotate(-5deg); }
+.leg.left{ left:6px; transform:rotate(10deg); }
+.leg.right{ right:6px; transform:rotate(-10deg); }
 
-/* ===== SPINNER TOP ===== */
+/* ===== WHEEL TOP ===== */
 
-#spinnerWrap{
+#wheelWrap{
 position:fixed;
 top:20px;
 left:50%;
@@ -119,11 +118,11 @@ border:3px solid white;
 border-radius:12px;
 }
 
-#spinner{
+#wheel{
 display:flex;
 }
 
-.card{
+.item{
 width:140px;
 height:140px;
 margin:0 4px;
@@ -134,48 +133,47 @@ background:#222;
 border-radius:10px;
 }
 
-.card img{
+.item img{
 width:120px;
 height:120px;
-object-fit:cover;
 border-radius:8px;
 }
 
-/* ===== NEEDLE ===== */
+/* PIN TOP */
 
-#needle{
+#pin{
 position:fixed;
-top:120px;
+top:0px;
 left:50%;
 transform:translateX(-50%);
-font-size:40px;
+font-size:50px;
 color:red;
+z-index:10;
 }
 
-/* ===== BUTTONS ===== */
+/* ===== BUTTONS BOTTOM ===== */
 
-#buttons{
+#ui{
 position:fixed;
-top:170px;
+bottom:30px;
 left:50%;
 transform:translateX(-50%);
 text-align:center;
 }
 
 #spinBtn{
-padding:15px 60px;
-font-size:26px;
-border:none;
+padding:16px 70px;
+font-size:28px;
 border-radius:14px;
+border:none;
 background:#00e5ff;
 color:white;
 cursor:pointer;
 }
 
 #skipBtn{
-margin-top:6px;
-padding:6px 20px;
-font-size:14px;
+margin-top:8px;
+padding:6px 25px;
 }
 
 /* ===== POPUP ===== */
@@ -190,14 +188,14 @@ font-weight:bold;
 display:none;
 }
 
-/* ===== FLASH ===== */
+/* FLASH */
 
 #flash{
 position:fixed;
 inset:0;
 opacity:0;
 pointer-events:none;
-transition:opacity .3s;
+transition:opacity .2s;
 }
 
 </style>
@@ -205,13 +203,14 @@ transition:opacity .3s;
 
 <body>
 
-<div id="sky">
-<div id="cloud"></div>
+<div id="world">
+<div class="ground"></div>
 
-<div id="platform">
-<div id="grass"></div>
-<div id="dirt"></div>
-</div>
+<div class="tree" style="left:400px"></div>
+<div class="tree" style="left:900px"></div>
+
+<div class="river" style="left:600px"></div>
+<div class="river" style="left:1400px"></div>
 
 <div id="player">
 <div class="head"></div>
@@ -223,13 +222,13 @@ transition:opacity .3s;
 </div>
 </div>
 
-<div id="spinnerWrap">
-<div id="spinner"></div>
+<div id="pin">▼</div>
+
+<div id="wheelWrap">
+<div id="wheel"></div>
 </div>
 
-<div id="needle">▼</div>
-
-<div id="buttons">
+<div id="ui">
 <button id="spinBtn">SPIN</button><br>
 <button id="skipBtn">Skip</button>
 </div>
@@ -237,43 +236,55 @@ transition:opacity .3s;
 <div id="popup"></div>
 <div id="flash"></div>
 
+<audio id="tick" src="tick.mp3"></audio>
+
 <script>
 
-/* ===== JUMP ===== */
+/* ===== WORLD MOVEMENT ===== */
 
-let vel=0;
-let grounded=true;
 let player=document.getElementById("player");
+let keys={};
+let vx=0;
+let vy=0;
+let grounded=true;
+let worldOffset=0;
 
-document.addEventListener("keydown",e=>{
-if(e.code==="Space" && grounded){
-vel=14;
+document.addEventListener("keydown",e=>keys[e.key.toLowerCase()]=true);
+document.addEventListener("keyup",e=>keys[e.key.toLowerCase()]=false);
+
+function worldLoop(){
+
+if(keys["a"]) worldOffset+=4;
+if(keys["d"]) worldOffset-=4;
+
+if(keys[" "] && grounded){
+vy=14;
 grounded=false;
 }
-});
 
-function jumpLoop(){
-let bottom=parseFloat(player.style.bottom||"200");
+vy-=0.7;
 
-vel-=0.7;
-bottom+=vel;
+let bottom=parseFloat(player.style.bottom||200);
+bottom+=vy;
 
 if(bottom<=200){
 bottom=200;
-vel=0;
+vy=0;
 grounded=true;
 }
 
 player.style.bottom=bottom+"px";
-requestAnimationFrame(jumpLoop);
+document.getElementById("world").style.transform=`translateX(${worldOffset}px)`;
+
+requestAnimationFrame(worldLoop);
 }
-jumpLoop();
+worldLoop();
 
 /* ===== RNG ===== */
 
 const RARITIES=[
-{name:"Common",chance:50,color:"#888"},
-{name:"Rare",chance:30,color:"#2196f3"},
+{name:"Common",chance:55,color:"#888"},
+{name:"Rare",chance:25,color:"#2196f3"},
 {name:"Ultra",chance:15,color:"#9c27b0"},
 {name:"Mythic",chance:4,color:"#ff9800"},
 {name:"Divine",chance:1,color:"#ffd700"}
@@ -285,27 +296,23 @@ const MEMES=[
 {img:"https://i.imgflip.com/2fm6x.jpg",rarity:"Ultra"}
 ];
 
-/* ===== BUILD WHEEL ===== */
-
-const spinner=document.getElementById("spinner");
+const wheel=document.getElementById("wheel");
 
 function buildWheel(){
-spinner.innerHTML="";
-for(let i=0;i<200;i++){
+wheel.innerHTML="";
+for(let i=0;i<400;i++){
 let m=MEMES[i%MEMES.length];
 let r=RARITIES.find(x=>x.name===m.rarity);
 
 let d=document.createElement("div");
-d.className="card";
+d.className="item";
 d.style.boxShadow=`0 0 20px ${r.color}`;
 d.innerHTML=`<img src="${m.img}">`;
 
-spinner.appendChild(d);
+wheel.appendChild(d);
 }
 }
 buildWheel();
-
-/* ===== RNG PICK ===== */
 
 function pick(){
 let roll=Math.random()*100;
@@ -320,10 +327,11 @@ return pool[Math.floor(Math.random()*pool.length)];
 return MEMES[0];
 }
 
-/* ===== SPIN ===== */
+/* ===== SOLS STYLE SPIN ===== */
 
 let spinning=false;
-let spinTimeout;
+let tickInterval;
+let spinStart;
 
 document.getElementById("spinBtn").onclick=startSpin;
 document.getElementById("skipBtn").onclick=skipSpin;
@@ -333,33 +341,74 @@ function startSpin(){
 if(spinning) return;
 spinning=true;
 
-spinner.style.transition="none";
-spinner.style.transform="translateX(0px)";
-spinner.offsetHeight;
+let tick=document.getElementById("tick");
 
-let meme=pick();
-let index=Math.floor(Math.random()*100)+80;
-let dist=index*150;
+wheel.style.transition="none";
+wheel.style.transform="translateX(0px)";
+wheel.offsetHeight;
 
-spinner.style.transition="transform 5s cubic-bezier(.1,.7,.1,1)";
-spinner.style.transform=`translateX(-${dist}px)`;
+let duration=6000;
+spinStart=performance.now();
 
-spinTimeout=setTimeout(()=>{
-finishSpin(meme);
-},5000);
+startTickSound();
+
+function anim(t){
+
+let p=(t-spinStart)/duration;
+if(p>1)p=1;
+
+let ease=1-Math.pow(1-p,3);
+let move=ease*9000;
+
+wheel.style.transform=`translateX(-${move}px)`;
+
+updateTickSpeed(p);
+
+if(p<1 && spinning){
+requestAnimationFrame(anim);
+}else{
+finishSpin();
+}
+}
+
+requestAnimationFrame(anim);
+}
+
+function startTickSound(){
+let t=document.getElementById("tick");
+tickInterval=setInterval(()=>{
+t.currentTime=0;
+t.play();
+},60);
+}
+
+function updateTickSpeed(progress){
+clearInterval(tickInterval);
+let speed=60+(progress*300);
+tickInterval=setInterval(()=>{
+let t=document.getElementById("tick");
+t.currentTime=0;
+t.play();
+},speed);
 }
 
 function skipSpin(){
-if(!spinning) return;
-clearTimeout(spinTimeout);
-finishSpin(pick());
+if(!spinning)return;
+spinning=false;
+finishSpin();
 }
 
-function finishSpin(meme){
-spinning=false;
+function finishSpin(){
+
+clearInterval(tickInterval);
+
+let meme=pick();
 let r=RARITIES.find(x=>x.name===meme.rarity);
+
 showPopup(r);
 flash(r.color);
+
+spinning=false;
 }
 
 function showPopup(r){
@@ -374,10 +423,9 @@ function flash(color){
 let f=document.getElementById("flash");
 f.style.background=color;
 f.style.opacity="0.5";
-setTimeout(()=>f.style.opacity="0",400);
+setTimeout(()=>f.style.opacity="0",300);
 }
 
 </script>
-
 </body>
 </html>
