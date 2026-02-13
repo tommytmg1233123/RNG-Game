@@ -32,25 +32,21 @@ body{
     border-left:18px solid transparent;
     border-right:18px solid transparent;
     border-top:36px solid red;
-    z-index:5;
 }
 
 #strip{
     display:flex;
     position:absolute;
     left:0;
-    top:0;
 }
 
 .item{
     width:160px;
     height:160px;
     display:flex;
+    flex-direction:column;
     align-items:center;
     justify-content:center;
-    flex-direction:column;
-    font-size:18px;
-    transition:0.3s;
 }
 
 .item img{
@@ -60,7 +56,6 @@ body{
     border-radius:10px;
 }
 
-/* RARITY GLOWS */
 .common{ box-shadow:0 0 10px #666 inset; }
 .rare{ box-shadow:0 0 20px #0099ff inset; }
 .epic{ box-shadow:0 0 25px #aa00ff inset; }
@@ -78,22 +73,6 @@ button{
 
 #spinBtn{ background:#00ccff; }
 #skipBtn{ background:#ff4444; }
-
-#result img{
-    width:180px;
-    margin-top:10px;
-    border-radius:12px;
-}
-
-.flash{
-    animation:flash 0.2s infinite;
-}
-
-@keyframes flash{
-    0%{ background:#111; }
-    50%{ background:#222; }
-    100%{ background:#111; }
-}
 </style>
 </head>
 
@@ -111,130 +90,183 @@ button{
 
 <div id="result"></div>
 
-<h3>Best Rolls</h3>
+<h3>Saved Best Rolls</h3>
 <ul id="historyList"></ul>
 
-<!-- SOUNDS -->
-<audio id="spinSound" src="https://assets.mixkit.co/active_storage/sfx/2003/2003-preview.mp3"></audio>
-<audio id="winSound" src="https://assets.mixkit.co/active_storage/sfx/2018/2018-preview.mp3"></audio>
-
 <script>
-const items = [
-{ name:"Common", rarity:0.60, class:"common", img:"https://i.imgflip.com/30b1gx.jpg" },
-{ name:"Rare", rarity:0.25, class:"rare", img:"https://i.imgflip.com/1bij.jpg" },
-{ name:"Epic", rarity:0.10, class:"epic", img:"https://i.imgflip.com/26am.jpg" },
-{ name:"Legendary", rarity:0.039, class:"legendary", img:"https://i.imgflip.com/2fm6x.jpg" },
-{ name:"Ultra Rare", rarity:0.009, class:"ultra", img:"https://i.imgflip.com/4/1otk96.jpg" },
-{ name:"GOD TIER", rarity:0.001, class:"ultra", img:"https://i.imgflip.com/3vzej.jpg" }
+
+/* ⭐ MASS MEME DATABASE */
+
+/* ADD AS MANY AS YOU WANT HERE */
+const memePools = {
+
+common:[
+"https://i.imgflip.com/30b1gx.jpg",
+"https://i.imgflip.com/1bij.jpg",
+"https://i.imgflip.com/26am.jpg",
+"https://i.imgflip.com/2fm6x.jpg",
+"https://i.imgflip.com/4t0m5.jpg"
+],
+
+rare:[
+"https://i.imgflip.com/3vzej.jpg",
+"https://i.imgflip.com/1otk96.jpg",
+"https://i.imgflip.com/9ehk.jpg"
+],
+
+epic:[
+"https://i.imgflip.com/54hjww.jpg",
+"https://i.imgflip.com/5c7lwq.jpg"
+],
+
+legendary:[
+"https://i.imgflip.com/5w3z0n.jpg"
+],
+
+ultra:[
+"https://i.imgflip.com/6kq6pl.jpg"
+]
+
+};
+
+/* RARITY TABLE */
+const rarities = [
+{ name:"Common", chance:0.60, class:"common", pool:"common" },
+{ name:"Rare", chance:0.25, class:"rare", pool:"rare" },
+{ name:"Epic", chance:0.10, class:"epic", pool:"epic" },
+{ name:"Legendary", chance:0.039, class:"legendary", pool:"legendary" },
+{ name:"GOD", chance:0.001, class:"ultra", pool:"ultra" }
 ];
 
-let history=[];
+let history = JSON.parse(localStorage.getItem("rngHistory")) || [];
 let spinning=false;
 let stripPos=0;
 let animation;
 
-function makeStrip(){
-    const strip=document.getElementById("strip");
-    strip.innerHTML="";
-    for(let i=0;i<120;i++){
-        let item=items[Math.floor(Math.random()*items.length)];
-        let div=document.createElement("div");
-        div.className="item "+item.class;
-        div.innerHTML=`<img src="${item.img}"><div>${item.name}</div>`;
-        strip.appendChild(div);
-    }
+updateHistoryUI();
+
+function saveHistory(){
+localStorage.setItem("rngHistory", JSON.stringify(history));
+}
+
+function randomFrom(array){
+return array[Math.floor(Math.random()*array.length)];
 }
 
 function roll(){
-    let r=Math.random();
-    let total=0;
-    for(let item of items){
-        total+=item.rarity;
-        if(r<=total) return item;
-    }
-    return items[0];
+let r=Math.random();
+let total=0;
+
+for(let rar of rarities){
+total+=rar.chance;
+if(r<=total){
+return {
+rarity:rar,
+img:randomFrom(memePools[rar.pool])
+};
+}
+}
 }
 
-/* ROBLOX STYLE FAST → SLOW SPIN */
+/* STRIP CREATION */
+function makeStrip(){
+const strip=document.getElementById("strip");
+strip.innerHTML="";
+
+for(let i=0;i<180;i++){
+
+let rar=randomFrom(rarities);
+let img=randomFrom(memePools[rar.pool]);
+
+let div=document.createElement("div");
+div.className="item "+rar.class;
+div.innerHTML=`<img src="${img}"><div>${rar.name}</div>`;
+
+strip.appendChild(div);
+}
+}
+
+/* ROBLOX STYLE SPIN */
 function spinTo(targetIndex){
-    const strip=document.getElementById("strip");
-    const width=strip.children[0].offsetWidth;
-    const centerOffset=(700/2)-(width/2);
-    const end=-(targetIndex*width)+centerOffset;
+const strip=document.getElementById("strip");
+const width=strip.children[0].offsetWidth;
+const centerOffset=(700/2)-(width/2);
 
-    const duration=2200;
-    const start=performance.now();
-    const spinSound=document.getElementById("spinSound");
-    spinSound.currentTime=0;
-    spinSound.play();
+const extraDistance=5000;
+const end=-(targetIndex*width)+centerOffset-extraDistance;
 
-    spinning=true;
+const duration=4200;
+const start=performance.now();
 
-    function frame(t){
-        let progress=(t-start)/duration;
-        if(progress>1) progress=1;
+spinning=true;
 
-        /* VERY FAST START */
-        let ease = 1 - Math.pow(1-progress,5);
+function frame(t){
+let progress=(t-start)/duration;
+if(progress>1) progress=1;
 
-        strip.style.left=stripPos+(end-stripPos)*ease+"px";
+let ease=1-Math.pow(1-progress,5);
 
-        if(progress<1 && spinning){
-            animation=requestAnimationFrame(frame);
-        }else{
-            spinning=false;
-            stripPos=parseFloat(strip.style.left)||0;
-            finishRoll(targetIndex);
-        }
-    }
-    animation=requestAnimationFrame(frame);
+strip.style.left=stripPos+(end-stripPos)*ease+"px";
+
+if(progress<1 && spinning){
+animation=requestAnimationFrame(frame);
+}else{
+spinning=false;
+stripPos=parseFloat(strip.style.left)||0;
+finishRoll(targetIndex);
+}
+}
+animation=requestAnimationFrame(frame);
 }
 
 function finishRoll(index){
-    const strip=document.getElementById("strip");
-    const itemDiv=strip.children[index];
-    const name=itemDiv.innerText;
-    const item=items.find(i=>name.includes(i.name));
+const strip=document.getElementById("strip");
+const name=strip.children[index].innerText;
+const img=strip.children[index].querySelector("img").src;
 
-    document.getElementById("winSound").play();
+document.getElementById("result").innerHTML=
+`<h2>${name}</h2><img src="${img}" width="180">`;
 
-    document.getElementById("result").innerHTML=
-    `<h2>${item.name}</h2><img src="${item.img}">`;
+history.push({name,img});
+saveHistory();
+updateHistoryUI();
+}
 
-    history.push(item);
-    history.sort((a,b)=>a.rarity-b.rarity);
-
-    const list=document.getElementById("historyList");
-    list.innerHTML="";
-    history.forEach(h=>{
-        let li=document.createElement("li");
-        li.innerText=h.name;
-        list.appendChild(li);
-    });
-
-    document.body.classList.add("flash");
-    setTimeout(()=>document.body.classList.remove("flash"),400);
+function updateHistoryUI(){
+const list=document.getElementById("historyList");
+list.innerHTML="";
+history.forEach(h=>{
+let li=document.createElement("li");
+li.innerText=h.name;
+list.appendChild(li);
+});
 }
 
 document.getElementById("spinBtn").onclick=()=>{
-    if(spinning) return;
+if(spinning) return;
 
-    makeStrip();
-    let result=roll();
+makeStrip();
+let result=roll();
 
-    const strip=document.getElementById("strip");
-    let target=[...strip.children].findIndex(c=>c.innerText.includes(result.name));
-    if(target<0) target=0;
+const strip=document.getElementById("strip");
 
-    spinTo(target);
+let target=[...strip.children].findIndex(c=>
+c.innerText.includes(result.rarity.name)
+);
+
+if(target<0) target=0;
+
+spinTo(target);
 };
 
 document.getElementById("skipBtn").onclick=()=>{
-    if(!spinning) return;
-    spinning=false;
-    cancelAnimationFrame(animation);
+if(!spinning) return;
+spinning=false;
+cancelAnimationFrame(animation);
 };
+
 </script>
 
 </body>
 </html>
+
