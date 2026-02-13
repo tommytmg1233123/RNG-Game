@@ -3,149 +3,223 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RNG Meme Spinner</title>
+<title>Meme RNG Game</title>
+
 <style>
-  body { font-family: Arial, sans-serif; background: #111; color: #fff; text-align: center; }
-  #spinner { margin: 50px auto; width: 300px; height: 80px; overflow: hidden; border: 2px solid #fff; border-radius: 10px; position: relative; }
-  .item-strip { display: flex; position: absolute; top: 0; left: 0; }
-  .item { width: 80px; height: 80px; line-height: 80px; font-size: 16px; border-right: 1px solid #555; background: #222; }
-  #result { margin-top: 20px; }
-  #history { margin-top: 30px; max-width: 90%; margin-left: auto; margin-right: auto; text-align: left; }
-  #skipBtn { margin-top: 20px; padding: 10px 20px; font-size: 16px; cursor: pointer; }
-  img { max-width: 100px; margin-top: 10px; border: 2px solid #fff; border-radius: 5px; }
+body{
+    background:#111;
+    color:white;
+    font-family:Arial;
+    text-align:center;
+}
+
+h1{
+    margin-top:30px;
+}
+
+/* BIGGER SPINNER */
+#spinner{
+    width:600px;
+    height:140px;
+    margin:40px auto;
+    overflow:hidden;
+    border:4px solid white;
+    border-radius:16px;
+    position:relative;
+}
+
+/* NEEDLE POINTER */
+#needle{
+    position:absolute;
+    left:50%;
+    top:-15px;
+    transform:translateX(-50%);
+    width:0;
+    height:0;
+    border-left:15px solid transparent;
+    border-right:15px solid transparent;
+    border-top:30px solid red;
+    z-index:10;
+}
+
+#strip{
+    display:flex;
+    position:absolute;
+    left:0;
+    top:0;
+}
+
+.item{
+    width:140px;
+    height:140px;
+    background:#222;
+    border-right:1px solid #444;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:18px;
+}
+
+button{
+    padding:14px 30px;
+    font-size:20px;
+    margin:10px;
+    cursor:pointer;
+    border:none;
+    border-radius:10px;
+}
+
+#spinBtn{ background:#00ccff; }
+#skipBtn{ background:#ff4444; }
+
+#result img{
+    width:160px;
+    border:2px solid white;
+    border-radius:10px;
+    margin-top:10px;
+}
+
+#history{
+    margin-top:40px;
+}
 </style>
 </head>
+
 <body>
 
-<h1>RNG Meme Spinner</h1>
+<h1>Meme RNG Spin</h1>
 
 <div id="spinner">
-  <div class="item-strip" id="itemStrip"></div>
+    <div id="needle"></div>
+    <div id="strip"></div>
 </div>
 
-<button id="spinBtn">Spin</button>
-<button id="skipBtn">Skip Roll</button>
+<button id="spinBtn">SPIN</button>
+<button id="skipBtn">SKIP</button>
 
 <div id="result"></div>
-<div id="history"><h3>History:</h3><ul id="historyList"></ul></div>
+
+<div id="history">
+<h3>Best Rolls</h3>
+<ul id="historyList"></ul>
+</div>
 
 <script>
 const items = [
-  {name: "Meme A", image: "https://via.placeholder.com/100?text=Meme+A", rarity: 0.5},  // 50%
-  {name: "Meme B", image: "https://via.placeholder.com/100?text=Meme+B", rarity: 0.3},  // 30%
-  {name: "Meme C", image: "https://via.placeholder.com/100?text=Meme+C", rarity: 0.1},  // 10%
-  {name: "Meme D", image: "https://via.placeholder.com/100?text=Meme+D", rarity: 0.09}, // 9%
-  {name: "Meme E", image: "https://via.placeholder.com/100?text=Meme+E", rarity: 0.01}  // 1%
+{ name:"Common Meme", rarity:0.6, img:"https://via.placeholder.com/200?text=Common" },
+{ name:"Rare Meme", rarity:0.25, img:"https://via.placeholder.com/200?text=Rare" },
+{ name:"Epic Meme", rarity:0.1, img:"https://via.placeholder.com/200?text=Epic" },
+{ name:"Legendary Meme", rarity:0.05, img:"https://via.placeholder.com/200?text=Legendary" }
 ];
 
-let history = [];
-let spinning = false;
-let animationFrame;
-let stripPos = 0;
+let history=[];
+let spinning=false;
+let animation;
+let stripPos=0;
 
-// Generate the spinning strip with multiple copies of items for animation
-function generateStrip() {
-  const strip = document.getElementById("itemStrip");
-  strip.innerHTML = "";
-  for (let i = 0; i < 50; i++) { // repeat to simulate spin
-    const item = items[Math.floor(Math.random()*items.length)];
-    const div = document.createElement("div");
-    div.className = "item";
-    div.textContent = item.name;
-    strip.appendChild(div);
-  }
-}
-
-// RNG function based on rarity
-function rollItem() {
-  const rand = Math.random();
-  let cumulative = 0;
-  for (const item of items) {
-    cumulative += item.rarity;
-    if (rand <= cumulative) return item;
-  }
-  return items[0]; // fallback
-}
-
-// Animate the spin
-function animateSpin(targetIndex, duration = 3000) {
-  const strip = document.getElementById("itemStrip");
-  const totalItems = strip.children.length;
-  const itemWidth = strip.children[0].offsetWidth;
-  const finalPos = -(targetIndex * itemWidth);
-
-  const start = performance.now();
-  spinning = true;
-
-  function step(time) {
-    const elapsed = time - start;
-    const progress = Math.min(elapsed / duration, 1);
-    // ease out effect
-    const eased = 1 - Math.pow(1 - progress, 3);
-    strip.style.left = stripPos + (finalPos - stripPos) * eased + "px";
-
-    if (progress < 1 && spinning) {
-      animationFrame = requestAnimationFrame(step);
-    } else {
-      spinning = false;
-      stripPos = parseFloat(strip.style.left) || 0;
-      showResult(targetIndex);
+function makeStrip(){
+    const strip=document.getElementById("strip");
+    strip.innerHTML="";
+    for(let i=0;i<80;i++){
+        let item=items[Math.floor(Math.random()*items.length)];
+        let div=document.createElement("div");
+        div.className="item";
+        div.innerText=item.name;
+        strip.appendChild(div);
     }
-  }
-
-  animationFrame = requestAnimationFrame(step);
 }
 
-// Show the result and update history
-function showResult(targetIndex) {
-  const strip = document.getElementById("itemStrip");
-  const itemName = strip.children[targetIndex].textContent;
-  const itemData = items.find(i => i.name === itemName);
-
-  document.getElementById("result").innerHTML = `
-    <h2>You got: ${itemName}</h2>
-    <img src="${itemData.image}" alt="${itemName}">
-  `;
-
-  history.push(itemData);
-  // sort by rarity descending
-  const sorted = [...history].sort((a,b)=> b.rarity - a.rarity);
-  const historyList = document.getElementById("historyList");
-  historyList.innerHTML = "";
-  sorted.forEach(i => {
-    const li = document.createElement("li");
-    li.textContent = i.name;
-    historyList.appendChild(li);
-  });
+function roll(){
+    let r=Math.random();
+    let total=0;
+    for(let item of items){
+        total+=item.rarity;
+        if(r<=total) return item;
+    }
+    return items[0];
 }
 
-// Spin button
-document.getElementById("spinBtn").addEventListener("click", () => {
-  if (spinning) return;
-  generateStrip();
-  const resultItem = rollItem();
+/* FAST 2 SECOND SPIN */
+function spinTo(targetIndex,duration=2000){
+    const strip=document.getElementById("strip");
+    const width=strip.children[0].offsetWidth;
 
-  // pick a random position of the item in the strip
-  const strip = document.getElementById("itemStrip");
-  let targetIndex = Array.from(strip.children).findIndex(c => c.textContent === resultItem.name);
-  if (targetIndex < 0) targetIndex = 0;
+    /* Center on needle */
+    const centerOffset = (600/2) - (width/2);
 
-  animateSpin(targetIndex);
-});
+    const end=-(targetIndex*width)+centerOffset;
+    const startTime=performance.now();
+    spinning=true;
 
-// Skip roll button
-document.getElementById("skipBtn").addEventListener("click", () => {
-  if (!spinning) return;
-  spinning = false;
-  cancelAnimationFrame(animationFrame);
-  const strip = document.getElementById("itemStrip");
-  // jump to a final roll
-  const resultItem = rollItem();
-  const targetIndex = Array.from(strip.children).findIndex(c => c.textContent === resultItem.name);
-  strip.style.left = -(targetIndex * strip.children[0].offsetWidth) + "px";
-  stripPos = parseFloat(strip.style.left) || 0;
-  showResult(targetIndex);
-});
+    function frame(time){
+        let progress=(time-startTime)/duration;
+        if(progress>1) progress=1;
+
+        /* Fast start slow end */
+        let ease=1-Math.pow(1-progress,4);
+
+        strip.style.left=stripPos+(end-stripPos)*ease+"px";
+
+        if(progress<1 && spinning){
+            animation=requestAnimationFrame(frame);
+        }else{
+            spinning=false;
+            stripPos=parseFloat(strip.style.left)||0;
+            showResult(targetIndex);
+        }
+    }
+    animation=requestAnimationFrame(frame);
+}
+
+function showResult(index){
+    const strip=document.getElementById("strip");
+    const name=strip.children[index].innerText;
+    const item=items.find(i=>i.name===name);
+
+    document.getElementById("result").innerHTML=
+    "<h2>You Got: "+name+"</h2><img src='"+item.img+"'>";
+
+    history.push(item);
+    history.sort((a,b)=>a.rarity-b.rarity);
+
+    const list=document.getElementById("historyList");
+    list.innerHTML="";
+    history.forEach(h=>{
+        let li=document.createElement("li");
+        li.innerText=h.name;
+        list.appendChild(li);
+    });
+}
+
+document.getElementById("spinBtn").onclick=()=>{
+    if(spinning) return;
+    makeStrip();
+    let result=roll();
+
+    const strip=document.getElementById("strip");
+    let target=[...strip.children].findIndex(c=>c.innerText===result.name);
+    if(target<0) target=0;
+
+    spinTo(target);
+};
+
+document.getElementById("skipBtn").onclick=()=>{
+    if(!spinning) return;
+    spinning=false;
+    cancelAnimationFrame(animation);
+
+    const strip=document.getElementById("strip");
+    let result=roll();
+    let target=[...strip.children].findIndex(c=>c.innerText===result.name);
+    if(target<0) target=0;
+
+    const width=strip.children[0].offsetWidth;
+    const centerOffset = (600/2) - (width/2);
+
+    strip.style.left=-(target*width)+centerOffset+"px";
+    stripPos=parseFloat(strip.style.left)||0;
+    showResult(target);
+};
 </script>
 
 </body>
