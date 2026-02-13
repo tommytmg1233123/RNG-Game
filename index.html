@@ -1,340 +1,361 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Meme RNG</title>
+<title>Meme RNG World</title>
 
 <style>
 body{
 margin:0;
-background:#111;
-color:white;
+overflow:hidden;
 font-family:Arial;
-overflow:hidden;
+background:#87CEEB;
 }
 
-/* ===== CHANCES TEXT ===== */
-#chances{
-position:fixed;
-top:10px;
-right:10px;
-font-size:14px;
-text-align:right;
-}
+/* ===== WORLD ===== */
 
-/* ===== INVENTORY TEXT (OLD STYLE) ===== */
-#inventoryText{
-position:fixed;
-bottom:10px;
-left:10px;
-font-size:14px;
-max-width:300px;
-}
-
-/* ===== SPINNER ===== */
-#spinnerWrap{
-position:fixed;
-top:20px;
-left:50%;
-transform:translateX(-50%);
-width:900px;
-height:150px;
-overflow:hidden;
-border:3px solid white;
-}
-
-#spinner{
-display:flex;
-}
-
-.card{
-width:150px;
-height:150px;
-margin:0 4px;
-background:#222;
-display:flex;
-flex-direction:column;
-align-items:center;
-justify-content:center;
-border-radius:8px;
-}
-
-.card img{
-width:120px;
-height:120px;
-object-fit:cover;
-}
-
-/* NEEDLE */
-#needle{
-position:absolute;
-top:-10px;
-left:50%;
-transform:translateX(-50%);
-font-size:40px;
-z-index:5;
-}
-
-/* ===== SOLS RNG STYLE BUTTON AREA ===== */
-#bottomUI{
-position:fixed;
-bottom:20px;
-left:50%;
-transform:translateX(-50%);
-text-align:center;
-}
-
-#spinBtn{
-font-size:28px;
-padding:14px 50px;
-}
-
-#skipBtn{
-margin-top:6px;
-font-size:14px;
-padding:6px 20px;
-}
-
-/* ===== STICKMAN WORLD ===== */
 #world{
 position:fixed;
-bottom:120px;
-left:0;
-width:100%;
-height:200px;
-background:#1b5e20;
-overflow:hidden;
+inset:0;
+background:linear-gradient(#87CEEB,#4CAF50);
 }
 
 .tree{
 position:absolute;
+width:40px;
+height:80px;
+background:#5d4037;
 bottom:0;
-width:60px;
-height:120px;
-background:#2e7d32;
-border-radius:20px;
 }
+.tree::after{
+content:"";
+position:absolute;
+bottom:60px;
+left:-40px;
+width:120px;
+height:100px;
+background:#2e7d32;
+border-radius:50%;
+}
+
+/* ===== PLAYER ===== */
 
 #player{
 position:absolute;
-bottom:0;
-left:100px;
 width:30px;
 height:60px;
+bottom:120px;
+left:200px;
+}
+
+.stick{
+position:absolute;
+background:black;
+}
+
+.head{
+width:20px;
+height:20px;
+border:3px solid black;
+border-radius:50%;
+left:5px;
+top:0;
 background:white;
 }
 
-/* POPUP TEXT */
+.body{
+width:4px;
+height:30px;
+left:13px;
+top:20px;
+}
+
+.arm{
+width:4px;
+height:20px;
+top:25px;
+}
+
+.arm.left{ left:0; transform:rotate(30deg); }
+.arm.right{ right:0; transform:rotate(-30deg); }
+
+.leg{
+width:4px;
+height:25px;
+top:45px;
+}
+
+.leg.left{ left:6px; transform:rotate(10deg); }
+.leg.right{ right:6px; transform:rotate(-10deg); }
+
+/* ===== RNG UI ===== */
+
+#rngUI{
+position:fixed;
+left:0;
+right:0;
+bottom:0;
+padding:20px;
+display:flex;
+flex-direction:column;
+align-items:center;
+}
+
+#spinBtn{
+padding:18px 60px;
+font-size:24px;
+border:none;
+border-radius:10px;
+background:#00e5ff;
+cursor:pointer;
+}
+
+#skipBtn{
+margin-top:10px;
+padding:6px 25px;
+}
+
+/* wheel */
+
+#wheelWindow{
+width:800px;
+height:140px;
+overflow:hidden;
+margin-bottom:20px;
+border:4px solid black;
+background:#111;
+}
+
+#wheel{
+display:flex;
+}
+
+.item{
+width:140px;
+height:140px;
+flex-shrink:0;
+display:flex;
+align-items:center;
+justify-content:center;
+}
+
+.item img{
+width:120px;
+height:120px;
+object-fit:cover;
+border-radius:10px;
+}
+
+/* needle */
+
+#needle{
+position:absolute;
+bottom:180px;
+left:50%;
+transform:translateX(-50%);
+font-size:40px;
+color:red;
+}
+
+/* popup */
+
 #popup{
 position:fixed;
-top:50%;
+top:20%;
 left:50%;
-transform:translate(-50%,-50%);
+transform:translateX(-50%);
 font-size:60px;
+font-weight:bold;
 display:none;
 }
+
+/* odds text */
+
+#odds{
+position:fixed;
+top:10px;
+right:10px;
+background:#000a;
+color:white;
+padding:10px;
+border-radius:8px;
+}
+
 </style>
 </head>
 
 <body>
 
-<div id="chances"></div>
-<div id="inventoryText"></div>
+<div id="world">
+<div class="tree" style="left:400px"></div>
+<div class="tree" style="left:900px"></div>
+</div>
 
-<div id="spinnerWrap">
-<div id="needle">▼</div>
-<div id="spinner"></div>
+<div id="player">
+<div class="head stick"></div>
+<div class="body stick"></div>
+<div class="arm left stick"></div>
+<div class="arm right stick"></div>
+<div class="leg left stick"></div>
+<div class="leg right stick"></div>
+</div>
+
+<div id="odds">
+Common 60%<br>
+Uncommon 25%<br>
+Rare 10%<br>
+Ultra 4%<br>
+Mythic 1%
 </div>
 
 <div id="popup"></div>
 
-<div id="world">
-<div id="player"></div>
+<div id="needle">▼</div>
+
+<div id="rngUI">
+<div id="wheelWindow">
+<div id="wheel"></div>
 </div>
 
-<div id="bottomUI">
-<button id="spinBtn" onclick="spin()">SPIN</button>
-<br>
-<button id="skipBtn" onclick="skipSpin()">Skip</button>
+<button id="spinBtn">SPIN</button>
+<button id="skipBtn">Skip</button>
 </div>
-
-<audio id="tick" src="tick.mp3"></audio>
 
 <script>
 
-/* ===== RARITIES (LESS COMMONS) ===== */
+/* ===== PLAYER MOVEMENT ===== */
+
+let player = document.getElementById("player");
+let keys = {};
+let velY = 0;
+let grounded = true;
+
+document.addEventListener("keydown", e=>keys[e.key.toLowerCase()] = true);
+document.addEventListener("keyup", e=>keys[e.key.toLowerCase()] = false);
+
+function gameLoop(){
+
+let x = player.offsetLeft;
+let y = player.offsetTop;
+
+if(keys["a"]) x -= 4;
+if(keys["d"]) x += 4;
+
+if(keys["w"] && grounded){
+velY = -14;
+grounded=false;
+}
+
+velY += 0.7;
+y += velY;
+
+if(y > window.innerHeight-180){
+y = window.innerHeight-180;
+velY = 0;
+grounded = true;
+}
+
+player.style.left = x+"px";
+player.style.top = y+"px";
+
+requestAnimationFrame(gameLoop);
+}
+gameLoop();
+
+/* ===== RNG SYSTEM ===== */
+
 const rarities=[
-{name:"Common",chance:45,color:"#888"},
-{name:"Uncommon",chance:30,color:"#4caf50"},
-{name:"Rare",chance:15,color:"#2196f3"},
-{name:"Ultra",chance:8,color:"#9c27b0"},
-{name:"Mythic",chance:1.9,color:"#ff9800"},
-{name:"Divine",chance:0.1,color:"#ffd700"}
+{name:"Common",chance:60,color:"gray"},
+{name:"Uncommon",chance:25,color:"green"},
+{name:"Rare",chance:10,color:"blue"},
+{name:"Ultra",chance:4,color:"purple"},
+{name:"Mythic",chance:1,color:"gold"}
 ];
 
-/* ===== SHOW CHANCES ===== */
-document.getElementById("chances").innerHTML=
-rarities.map(r=>`${r.name}: ${r.chance}%`).join("<br>");
-
-/* ===== REAL MEMES (ADD MORE IF YOU WANT) ===== */
-const memeImages=[
+const memes=[
 "https://i.imgflip.com/30b1gx.jpg",
 "https://i.imgflip.com/1bij.jpg",
 "https://i.imgflip.com/26am.jpg",
-"https://i.imgflip.com/2fm6x.jpg",
-"https://i.imgflip.com/3vzej.jpg"
+"https://i.imgflip.com/2fm6x.jpg"
 ];
 
-/* ===== BUILD MEMES ===== */
-const memes=[];
-for(let i=0;i<200;i++){
-let r=randomRarity();
-memes.push({
-rarity:r,
-img:memeImages[i % memeImages.length]
-});
-}
-
-/* ===== LOOP SPINNER ===== */
-const spinner=document.getElementById("spinner");
-
-function buildSpinner(){
-spinner.innerHTML="";
-for(let i=0;i<memes.length*3;i++){
-let m=memes[i % memes.length];
-let d=document.createElement("div");
-d.className="card";
-d.style.boxShadow=`0 0 20px ${m.rarity.color}`;
-d.innerHTML=`<img src="${m.img}">`;
-spinner.appendChild(d);
-}
-}
-buildSpinner();
-
-/* ===== RNG ===== */
 function randomRarity(){
 let roll=Math.random()*100;
-let total=0;
+let sum=0;
 for(let r of rarities){
-total+=r.chance;
-if(roll<=total)return r;
+sum+=r.chance;
+if(roll<sum) return r;
 }
 return rarities[0];
 }
 
-function randomMeme(){
-let r=randomRarity();
-let pool=memes.filter(m=>m.rarity.name===r.name);
-return pool[Math.floor(Math.random()*pool.length)];
+/* build infinite wheel */
+
+const wheel=document.getElementById("wheel");
+
+function buildWheel(){
+wheel.innerHTML="";
+for(let i=0;i<200;i++){
+let div=document.createElement("div");
+div.className="item";
+
+let img=document.createElement("img");
+img.src=memes[Math.floor(Math.random()*memes.length)];
+
+div.appendChild(img);
+wheel.appendChild(div);
 }
-
-/* ===== INVENTORY (OLD STYLE TEXT) ===== */
-let inventory=JSON.parse(localStorage.getItem("inv")||"[]");
-
-function updateInventory(){
-document.getElementById("inventoryText").innerHTML=
-"Your Stuff:<br>"+inventory.map(m=>m.rarity.name).join(", ");
 }
-updateInventory();
+buildWheel();
 
-/* ===== SPIN ===== */
+/* spin */
+
 let spinning=false;
-let skip=false;
+
+document.getElementById("spinBtn").onclick=spin;
+document.getElementById("skipBtn").onclick=endSpin;
 
 function spin(){
-
-if(spinning)return;
+if(spinning) return;
 spinning=true;
-skip=false;
 
-let meme=randomMeme();
-let index=memes.indexOf(meme)+(memes.length);
+let start=performance.now();
+let duration=4000;
+let startX=0;
 
-let distance=index*158;
+function animate(t){
+let p=(t-start)/duration;
+if(p>1) p=1;
 
-spinner.style.transition="transform 5s cubic-bezier(.1,.7,.1,1)";
-spinner.style.transform=`translateX(-${distance}px)`;
+let ease=1-Math.pow(1-p,3);
+let move = ease * 6000;
 
-tickLoop();
+wheel.style.transform=`translateX(${-move}px)`;
 
-setTimeout(()=>{
-finishSpin(meme);
-},5000);
-
+if(p<1){
+requestAnimationFrame(animate);
+}else{
+endSpin();
+}
 }
 
-function skipSpin(){
-skip=true;
+requestAnimationFrame(animate);
 }
 
-/* ===== SOUND ===== */
-function tickLoop(){
-let t=document.getElementById("tick");
-let int=setInterval(()=>{
-t.currentTime=0;
-t.play();
-if(!spinning)clearInterval(int);
-},120);
-}
-
-/* ===== FINISH ===== */
-function finishSpin(meme){
-
+function endSpin(){
 spinning=false;
 
-inventory.push(meme);
-localStorage.setItem("inv",JSON.stringify(inventory));
-updateInventory();
+let rarity=randomRarity();
 
-showPopup(meme.rarity.name);
+let popup=document.getElementById("popup");
+popup.style.display="block";
+popup.style.color=rarity.color;
+popup.innerText=rarity.name;
 
-}
-
-/* ===== POPUP TEXT ONLY ===== */
-function showPopup(text){
-let p=document.getElementById("popup");
-p.innerText=text;
-p.style.display="block";
-setTimeout(()=>p.style.display="none",1500);
-}
-
-/* ===== STICKMAN CONTROLS ===== */
-let player=document.getElementById("player");
-let px=100;
-let vy=0;
-let onGround=true;
-
-document.addEventListener("keydown",e=>{
-if(e.key==="a") px-=10;
-if(e.key==="d") px+=10;
-if(e.key==="w" && onGround){
-vy=12;
-onGround=false;
-}
-});
-
-function physics(){
-vy-=0.6;
-if(!onGround){
-player.style.bottom=(parseInt(player.style.bottom||0)+vy)+"px";
-if(parseInt(player.style.bottom)<=0){
-player.style.bottom="0px";
-onGround=true;
-}
-}
-player.style.left=px+"px";
-requestAnimationFrame(physics);
-}
-physics();
-
-/* TREES */
-for(let i=0;i<6;i++){
-let t=document.createElement("div");
-t.className="tree";
-t.style.left=(i*300+200)+"px";
-document.getElementById("world").appendChild(t);
+setTimeout(()=>popup.style.display="none",1500);
 }
 
 </script>
+
 </body>
 </html>
