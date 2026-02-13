@@ -11,6 +11,22 @@ body{
     font-family:Arial;
 }
 
+/* ===== STATS BAR ===== */
+
+#stats{
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    background:#000000aa;
+    color:white;
+    padding:10px 20px;
+    font-size:20px;
+    display:flex;
+    gap:30px;
+    z-index:20;
+}
+
 /* ===== WORLD ===== */
 
 #world{
@@ -28,24 +44,16 @@ body{
     background:#4caf50;
 }
 
+/* NEW TREE STYLE — using your PNG */
 .tree{
     position:absolute;
     bottom:180px;
-    width:40px;
-    height:100px;
-    background:#6d4c41;
-}
-.tree::after{
-    content:"";
-    position:absolute;
-    bottom:70px;
-    left:-40px;
     width:120px;
-    height:100px;
-    background:#2e7d32;
-    border-radius:50%;
+    height:160px;
+    background:url("https://i.imgur.com/AcBA0Pi.jpeg") no-repeat center/contain;
 }
 
+/* RIVER */
 .river{
     position:absolute;
     bottom:0;
@@ -58,7 +66,7 @@ body{
 
 #wheelWrap{
     position:fixed;
-    top:20px;
+    top:60px;
     left:50%;
     transform:translateX(-50%);
     width:900px;
@@ -94,7 +102,7 @@ body{
 
 #pin{
     position:fixed;
-    top:0px;
+    top:40px;
     left:50%;
     transform:translateX(-50%);
     font-size:50px;
@@ -153,6 +161,16 @@ body{
 
 <body>
 
+<!-- ===== STATS BAR ===== -->
+<div id="stats">
+    <div>Total Spins: <span id="s_total">0</span></div>
+    <div>Common: <span id="s_common">0</span></div>
+    <div>Rare: <span id="s_rare">0</span></div>
+    <div>Ultra: <span id="s_ultra">0</span></div>
+    <div>Mythic: <span id="s_mythic">0</span></div>
+    <div>Divine: <span id="s_divine">0</span></div>
+</div>
+
 <div id="world">
     <div class="ground"></div>
 
@@ -180,6 +198,26 @@ body{
 <audio id="tick" src="tick.mp3"></audio>
 
 <script>
+
+/* ===== STATS SYSTEM ===== */
+
+let stats={
+    total:0,
+    Common:0,
+    Rare:0,
+    Ultra:0,
+    Mythic:0,
+    Divine:0
+};
+
+function updateStats(){
+    document.getElementById("s_total").innerText=stats.total;
+    document.getElementById("s_common").innerText=stats.Common;
+    document.getElementById("s_rare").innerText=stats.Rare;
+    document.getElementById("s_ultra").innerText=stats.Ultra;
+    document.getElementById("s_mythic").innerText=stats.Mythic;
+    document.getElementById("s_divine").innerText=stats.Divine;
+}
 
 /* ===== RNG ===== */
 
@@ -228,7 +266,7 @@ function pick(){
     return MEMES[0];
 }
 
-/* ===== SOL'S STYLE SPIN ===== */
+/* ===== SPIN SYSTEM ===== */
 
 let spinning=false;
 let tickInterval;
@@ -241,8 +279,6 @@ function startSpin(){
 
     if(spinning) return;
     spinning=true;
-
-    let tick=document.getElementById("tick");
 
     wheel.style.transition="none";
     wheel.style.transform="translateX(0px)";
@@ -305,6 +341,11 @@ function finishSpin(){
 
     let meme=pick();
     let r=RARITIES.find(x=>x.name===meme.rarity);
+
+    /* UPDATE STATS */
+    stats.total++;
+    stats[r.name]++;
+    updateStats();
 
     showPopup(r);
     flash(r.color);
