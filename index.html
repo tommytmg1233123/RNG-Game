@@ -1,184 +1,141 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
-<title>Meme RNG World</title>
+<title>Meme RNG</title>
 
 <style>
 body{
 margin:0;
-overflow:hidden;
+background:#0f0f0f;
 font-family:Arial;
-background:#87CEEB;
-}
-
-/* ===== WORLD ===== */
-
-#world{
-position:fixed;
-inset:0;
-background:linear-gradient(#87CEEB,#4CAF50);
-}
-
-.tree{
-position:absolute;
-width:40px;
-height:80px;
-background:#5d4037;
-bottom:0;
-}
-.tree::after{
-content:"";
-position:absolute;
-bottom:60px;
-left:-40px;
-width:120px;
-height:100px;
-background:#2e7d32;
-border-radius:50%;
-}
-
-/* ===== PLAYER ===== */
-
-#player{
-position:absolute;
-width:30px;
-height:60px;
-bottom:120px;
-left:200px;
-}
-
-.stick{
-position:absolute;
-background:black;
-}
-
-.head{
-width:20px;
-height:20px;
-border:3px solid black;
-border-radius:50%;
-left:5px;
-top:0;
-background:white;
-}
-
-.body{
-width:4px;
-height:30px;
-left:13px;
-top:20px;
-}
-
-.arm{
-width:4px;
-height:20px;
-top:25px;
-}
-
-.arm.left{ left:0; transform:rotate(30deg); }
-.arm.right{ right:0; transform:rotate(-30deg); }
-
-.leg{
-width:4px;
-height:25px;
-top:45px;
-}
-
-.leg.left{ left:6px; transform:rotate(10deg); }
-.leg.right{ right:6px; transform:rotate(-10deg); }
-
-/* ===== RNG UI ===== */
-
-#rngUI{
-position:fixed;
-left:0;
-right:0;
-bottom:0;
-padding:20px;
-display:flex;
-flex-direction:column;
-align-items:center;
-}
-
-#spinBtn{
-padding:18px 60px;
-font-size:24px;
-border:none;
-border-radius:10px;
-background:#00e5ff;
-cursor:pointer;
-}
-
-#skipBtn{
-margin-top:10px;
-padding:6px 25px;
-}
-
-/* wheel */
-
-#wheelWindow{
-width:800px;
-height:140px;
+color:white;
 overflow:hidden;
-margin-bottom:20px;
-border:4px solid black;
-background:#111;
 }
 
-#wheel{
-display:flex;
-}
+/* ===== TOP INFO ===== */
 
-.item{
-width:140px;
-height:140px;
-flex-shrink:0;
-display:flex;
-align-items:center;
-justify-content:center;
-}
-
-.item img{
-width:120px;
-height:120px;
-object-fit:cover;
-border-radius:10px;
-}
-
-/* needle */
-
-#needle{
-position:absolute;
-bottom:180px;
-left:50%;
-transform:translateX(-50%);
-font-size:40px;
-color:red;
-}
-
-/* popup */
-
-#popup{
-position:fixed;
-top:20%;
-left:50%;
-transform:translateX(-50%);
-font-size:60px;
-font-weight:bold;
-display:none;
-}
-
-/* odds text */
-
-#odds{
+#topInfo{
 position:fixed;
 top:10px;
 right:10px;
 background:#000a;
-color:white;
 padding:10px;
+border-radius:10px;
+font-size:14px;
+}
+
+#rollCounter{
+position:fixed;
+top:10px;
+left:10px;
+background:#000a;
+padding:10px;
+border-radius:10px;
+}
+
+/* ===== SPINNER ===== */
+
+#spinnerWrap{
+position:fixed;
+top:80px;
+left:50%;
+transform:translateX(-50%);
+width:900px;
+height:150px;
+overflow:hidden;
+border:3px solid white;
+border-radius:12px;
+background:#111;
+}
+
+#spinner{
+display:flex;
+}
+
+.card{
+width:150px;
+height:150px;
+margin:0 4px;
+display:flex;
+align-items:center;
+justify-content:center;
+flex-direction:column;
+background:#222;
+border-radius:10px;
+}
+
+.card img{
+width:120px;
+height:120px;
+object-fit:cover;
 border-radius:8px;
+}
+
+/* ===== RED PIN ===== */
+
+#needle{
+position:absolute;
+top:60px;
+left:50%;
+transform:translateX(-50%);
+font-size:40px;
+color:red;
+z-index:5;
+}
+
+/* ===== SOLS STYLE UI ===== */
+
+#bottomUI{
+position:fixed;
+bottom:30px;
+left:50%;
+transform:translateX(-50%);
+text-align:center;
+}
+
+#spinBtn{
+background:linear-gradient(#00e5ff,#0094ff);
+border:none;
+padding:18px 70px;
+font-size:28px;
+border-radius:16px;
+color:white;
+cursor:pointer;
+box-shadow:0 0 25px #00e5ff;
+}
+
+#skipBtn{
+margin-top:8px;
+background:#333;
+border:none;
+padding:6px 24px;
+font-size:14px;
+border-radius:10px;
+color:white;
+cursor:pointer;
+}
+
+/* ===== POPUP TEXT ===== */
+
+#popup{
+position:fixed;
+top:35%;
+left:50%;
+transform:translateX(-50%);
+font-size:70px;
+font-weight:bold;
+display:none;
+}
+
+/* ===== FLASH OVERLAY ===== */
+
+#flash{
+position:fixed;
+inset:0;
+opacity:0;
+pointer-events:none;
+transition:opacity .3s;
 }
 
 </style>
@@ -186,173 +143,173 @@ border-radius:8px;
 
 <body>
 
-<div id="world">
-<div class="tree" style="left:400px"></div>
-<div class="tree" style="left:900px"></div>
-</div>
-
-<div id="player">
-<div class="head stick"></div>
-<div class="body stick"></div>
-<div class="arm left stick"></div>
-<div class="arm right stick"></div>
-<div class="leg left stick"></div>
-<div class="leg right stick"></div>
-</div>
-
-<div id="odds">
-Common 60%<br>
-Uncommon 25%<br>
-Rare 10%<br>
-Ultra 4%<br>
-Mythic 1%
-</div>
-
-<div id="popup"></div>
+<div id="rollCounter">Rolls: 0</div>
+<div id="topInfo"></div>
 
 <div id="needle">▼</div>
 
-<div id="rngUI">
-<div id="wheelWindow">
-<div id="wheel"></div>
+<div id="spinnerWrap">
+<div id="spinner"></div>
 </div>
 
-<button id="spinBtn">SPIN</button>
+<div id="popup"></div>
+<div id="flash"></div>
+
+<div id="bottomUI">
+<button id="spinBtn">SPIN</button><br>
 <button id="skipBtn">Skip</button>
 </div>
 
 <script>
 
-/* ===== PLAYER MOVEMENT ===== */
+/* ===== CUSTOM RARITIES (EDIT THIS) ===== */
 
-let player = document.getElementById("player");
-let keys = {};
-let velY = 0;
-let grounded = true;
-
-document.addEventListener("keydown", e=>keys[e.key.toLowerCase()] = true);
-document.addEventListener("keyup", e=>keys[e.key.toLowerCase()] = false);
-
-function gameLoop(){
-
-let x = player.offsetLeft;
-let y = player.offsetTop;
-
-if(keys["a"]) x -= 4;
-if(keys["d"]) x += 4;
-
-if(keys["w"] && grounded){
-velY = -14;
-grounded=false;
-}
-
-velY += 0.7;
-y += velY;
-
-if(y > window.innerHeight-180){
-y = window.innerHeight-180;
-velY = 0;
-grounded = true;
-}
-
-player.style.left = x+"px";
-player.style.top = y+"px";
-
-requestAnimationFrame(gameLoop);
-}
-gameLoop();
-
-/* ===== RNG SYSTEM ===== */
-
-const rarities=[
-{name:"Common",chance:60,color:"gray"},
-{name:"Uncommon",chance:25,color:"green"},
-{name:"Rare",chance:10,color:"blue"},
-{name:"Ultra",chance:4,color:"purple"},
-{name:"Mythic",chance:1,color:"gold"}
+const RARITIES=[
+{name:"Common",chance:45,color:"#888"},
+{name:"Uncommon",chance:30,color:"#4caf50"},
+{name:"Rare",chance:15,color:"#2196f3"},
+{name:"Ultra",chance:8,color:"#9c27b0"},
+{name:"Mythic",chance:1.9,color:"#ff9800"},
+{name:"Divine",chance:0.1,color:"#ffd700"}
 ];
 
-const memes=[
-"https://i.imgflip.com/30b1gx.jpg",
-"https://i.imgflip.com/1bij.jpg",
-"https://i.imgflip.com/26am.jpg",
-"https://i.imgflip.com/2fm6x.jpg"
+/* ===== CUSTOM MEMES (ADD YOUR OWN HERE) ===== */
+
+const CUSTOM_MEMES=[
+{
+name:"Drake Meme",
+img:"https://i.imgflip.com/30b1gx.jpg",
+rarity:"Common"
+},
+{
+name:"Distracted Boyfriend",
+img:"https://i.imgflip.com/1ur9b0.jpg",
+rarity:"Rare"
+}
 ];
+
+/* ===== SHOW CHANCES ===== */
+
+document.getElementById("topInfo").innerHTML=
+RARITIES.map(r=>`${r.name}: ${r.chance}%`).join("<br>");
+
+/* ===== BUILD MEME POOL ===== */
+
+const MEMES=CUSTOM_MEMES;
+
+/* ===== SPINNER BUILD ===== */
+
+const spinner=document.getElementById("spinner");
+
+function buildSpinner(){
+spinner.innerHTML="";
+for(let i=0;i<MEMES.length*6;i++){
+let m=MEMES[i % MEMES.length];
+let rarity=RARITIES.find(r=>r.name===m.rarity);
+
+let d=document.createElement("div");
+d.className="card";
+d.style.boxShadow=`0 0 20px ${rarity.color}`;
+d.innerHTML=`<img src="${m.img}">`;
+
+spinner.appendChild(d);
+}
+}
+buildSpinner();
+
+/* ===== RNG ===== */
 
 function randomRarity(){
 let roll=Math.random()*100;
-let sum=0;
-for(let r of rarities){
-sum+=r.chance;
-if(roll<sum) return r;
+let total=0;
+for(let r of RARITIES){
+total+=r.chance;
+if(roll<=total) return r;
 }
-return rarities[0];
+return RARITIES[0];
 }
 
-/* build infinite wheel */
-
-const wheel=document.getElementById("wheel");
-
-function buildWheel(){
-wheel.innerHTML="";
-for(let i=0;i<200;i++){
-let div=document.createElement("div");
-div.className="item";
-
-let img=document.createElement("img");
-img.src=memes[Math.floor(Math.random()*memes.length)];
-
-div.appendChild(img);
-wheel.appendChild(div);
+function randomMeme(){
+let r=randomRarity();
+let pool=MEMES.filter(m=>m.rarity===r.name);
+return pool[Math.floor(Math.random()*pool.length)];
 }
-}
-buildWheel();
 
-/* spin */
+/* ===== ROLL COUNTER SAVE ===== */
+
+let rolls=parseInt(localStorage.getItem("rolls")||0);
+updateRolls();
+
+function updateRolls(){
+document.getElementById("rollCounter").innerText="Rolls: "+rolls;
+}
+
+/* ===== SPIN SYSTEM ===== */
 
 let spinning=false;
+let spinTimeout;
 
-document.getElementById("spinBtn").onclick=spin;
-document.getElementById("skipBtn").onclick=endSpin;
+document.getElementById("spinBtn").onclick=startSpin;
+document.getElementById("skipBtn").onclick=skipSpin;
 
-function spin(){
+function startSpin(){
+
 if(spinning) return;
 spinning=true;
 
-let start=performance.now();
-let duration=4000;
-let startX=0;
+rolls++;
+localStorage.setItem("rolls",rolls);
+updateRolls();
 
-function animate(t){
-let p=(t-start)/duration;
-if(p>1) p=1;
+let meme=randomMeme();
+let index=MEMES.indexOf(meme)+(MEMES.length*2);
+let distance=index*158;
 
-let ease=1-Math.pow(1-p,3);
-let move = ease * 6000;
+spinner.style.transition="transform 5s cubic-bezier(.1,.7,.1,1)";
+spinner.style.transform=`translateX(-${distance}px)`;
 
-wheel.style.transform=`translateX(${-move}px)`;
+spinTimeout=setTimeout(()=>{
+finishSpin(meme);
+},5000);
 
-if(p<1){
-requestAnimationFrame(animate);
-}else{
-endSpin();
-}
 }
 
-requestAnimationFrame(animate);
+function skipSpin(){
+if(!spinning) return;
+clearTimeout(spinTimeout);
+let meme=randomMeme();
+finishSpin(meme);
 }
 
-function endSpin(){
+function finishSpin(meme){
+
 spinning=false;
 
-let rarity=randomRarity();
+let rarity=RARITIES.find(r=>r.name===meme.rarity);
 
-let popup=document.getElementById("popup");
-popup.style.display="block";
-popup.style.color=rarity.color;
-popup.innerText=rarity.name;
+showPopup(rarity);
+flash(rarity.color);
 
-setTimeout(()=>popup.style.display="none",1500);
+}
+
+/* ===== POPUP ===== */
+
+function showPopup(rarity){
+let p=document.getElementById("popup");
+p.innerText=rarity.name;
+p.style.color=rarity.color;
+p.style.display="block";
+
+setTimeout(()=>p.style.display="none",1500);
+}
+
+/* ===== FLASH ===== */
+
+function flash(color){
+let f=document.getElementById("flash");
+f.style.background=color;
+f.style.opacity="0.5";
+setTimeout(()=>f.style.opacity="0",400);
 }
 
 </script>
