@@ -6,335 +6,346 @@
 
 <style>
 body{
-margin:0;
-background:#111;
-color:white;
-font-family:Arial;
-overflow:hidden;
+    margin:0;
+    font-family:Arial;
+    background:#111;
+    color:white;
+    overflow:hidden;
+    user-select:none;
 }
 
-/* ===== CHANCES TEXT ===== */
+/* TITLE */
+h1{
+    text-align:center;
+    margin-top:10px;
+}
+
+/* RARITY CHANCES BOX */
 #chances{
-position:fixed;
-top:10px;
-right:10px;
-font-size:14px;
-text-align:right;
+    position:fixed;
+    top:10px;
+    right:10px;
+    background:#222;
+    padding:10px 15px;
+    border-radius:10px;
+    font-size:14px;
+    line-height:18px;
+    border:2px solid white;
 }
 
-/* ===== INVENTORY TEXT (OLD STYLE) ===== */
-#inventoryText{
-position:fixed;
-bottom:10px;
-left:10px;
-font-size:14px;
-max-width:300px;
-}
-
-/* ===== SPINNER ===== */
+/* SPINNER BAR */
 #spinnerWrap{
-position:fixed;
-top:20px;
-left:50%;
-transform:translateX(-50%);
-width:900px;
-height:150px;
-overflow:hidden;
-border:3px solid white;
-}
-
-#spinner{
-display:flex;
-}
-
-.card{
-width:150px;
-height:150px;
-margin:0 4px;
-background:#222;
-display:flex;
-flex-direction:column;
-align-items:center;
-justify-content:center;
-border-radius:8px;
-}
-
-.card img{
-width:120px;
-height:120px;
-object-fit:cover;
+    position:relative;
+    width:90%;
+    margin:20px auto;
+    height:150px;
+    border-radius:25px;
+    background:#222;
+    border:5px solid #fff;
+    overflow:hidden;
 }
 
 /* NEEDLE */
 #needle{
-position:absolute;
-top:-10px;
-left:50%;
-transform:translateX(-50%);
-font-size:40px;
-z-index:5;
+    position:absolute;
+    top:-5px;
+    left:50%;
+    transform:translateX(-50%);
+    font-size:40px;
+    z-index:10;
 }
 
-/* ===== SOLS RNG STYLE BUTTON AREA ===== */
-#bottomUI{
-position:fixed;
-bottom:20px;
-left:50%;
-transform:translateX(-50%);
-text-align:center;
+/* SPINNER */
+#spinner{
+    display:flex;
+    transition:transform 5s cubic-bezier(.1,.7,.1,1);
 }
 
+/* CARD */
+.card{
+    min-width:150px;
+    height:150px;
+    margin:0 6px;
+    background:#333;
+    border-radius:20px;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    box-shadow:0 0 25px white;
+}
+
+.card img{
+    width:110px;
+    height:110px;
+    border-radius:15px;
+    object-fit:cover;
+}
+
+/* SPIN BUTTON */
 #spinBtn{
-font-size:28px;
-padding:14px 50px;
+    position:fixed;
+    bottom:80px;
+    left:50%;
+    transform:translateX(-50%);
+    padding:18px 40px;
+    font-size:24px;
+    border-radius:20px;
+    border:none;
+    background:#4caf50;
+    color:white;
+    cursor:pointer;
 }
 
+/* SKIP BUTTON */
 #skipBtn{
-margin-top:6px;
-font-size:14px;
-padding:6px 20px;
+    position:fixed;
+    bottom:30px;
+    left:50%;
+    transform:translateX(-50%);
+    padding:10px 20px;
+    font-size:16px;
+    border-radius:15px;
+    border:none;
+    background:#888;
+    color:white;
+    cursor:pointer;
 }
 
-/* ===== STICKMAN WORLD ===== */
-#world{
-position:fixed;
-bottom:120px;
-left:0;
-width:100%;
-height:200px;
-background:#1b5e20;
-overflow:hidden;
+/* REVEAL */
+#reveal{
+    position:fixed;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%);
+    font-size:50px;
+    font-weight:bold;
+    display:none;
+    text-shadow:0 0 20px white;
+    text-align:center;
 }
 
-.tree{
-position:absolute;
-bottom:0;
-width:60px;
-height:120px;
-background:#2e7d32;
-border-radius:20px;
+#reveal img{
+    width:200px;
+    height:200px;
+    border-radius:20px;
+    margin-top:10px;
 }
 
-#player{
-position:absolute;
-bottom:0;
-left:100px;
-width:30px;
-height:60px;
-background:white;
+/* INVENTORY */
+#inventory{
+    position:fixed;
+    bottom:0;
+    left:0;
+    width:100%;
+    height:90px;
+    background:#0008;
+    display:flex;
+    overflow-x:auto;
+    padding:10px;
+    gap:10px;
 }
 
-/* POPUP TEXT */
-#popup{
-position:fixed;
-top:50%;
-left:50%;
-transform:translate(-50%,-50%);
-font-size:60px;
-display:none;
+.invItem{
+    min-width:70px;
+    height:70px;
+    border-radius:10px;
+    background:#222;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+.invItem img{
+    width:65px;
+    height:65px;
+    border-radius:10px;
+    object-fit:cover;
 }
 </style>
 </head>
 
 <body>
 
-<div id="chances"></div>
-<div id="inventoryText"></div>
+<h1>Meme RNG</h1>
+
+<div id="chances">
+<b>Rarity Chances:</b><br>
+Common — 40%<br>
+Uncommon — 30%<br>
+Rare — 20%<br>
+Ultra — 8%<br>
+Mythic — 1.5%<br>
+Divine — 0.5%
+</div>
 
 <div id="spinnerWrap">
-<div id="needle">▼</div>
-<div id="spinner"></div>
+    <div id="needle">▼</div>
+    <div id="spinner"></div>
 </div>
 
-<div id="popup"></div>
-
-<div id="world">
-<div id="player"></div>
-</div>
-
-<div id="bottomUI">
 <button id="spinBtn" onclick="spin()">SPIN</button>
-<br>
-<button id="skipBtn" onclick="skipSpin()">Skip</button>
-</div>
+<button id="skipBtn" onclick="skip()">SKIP</button>
 
-<audio id="tick" src="tick.mp3"></audio>
+<div id="reveal"></div>
+
+<div id="inventory"></div>
 
 <script>
-
-/* ===== RARITIES (LESS COMMONS) ===== */
-const rarities=[
-{name:"Common",chance:45,color:"#888"},
-{name:"Uncommon",chance:30,color:"#4caf50"},
-{name:"Rare",chance:15,color:"#2196f3"},
-{name:"Ultra",chance:8,color:"#9c27b0"},
-{name:"Mythic",chance:1.9,color:"#ff9800"},
-{name:"Divine",chance:0.1,color:"#ffd700"}
+/* RARITIES */
+const rarities = [
+    {name:"Common", chance:40, color:"#888"},
+    {name:"Uncommon", chance:30, color:"#4caf50"},
+    {name:"Rare", chance:20, color:"#2196f3"},
+    {name:"Ultra", chance:8, color:"#9c27b0"},
+    {name:"Mythic", chance:1.5, color:"#ff9800"},
+    {name:"Divine", chance:0.5, color:"#ffd700"}
 ];
 
-/* ===== SHOW CHANCES ===== */
-document.getElementById("chances").innerHTML=
-rarities.map(r=>`${r.name}: ${r.chance}%`).join("<br>");
-
-/* ===== REAL MEMES (ADD MORE IF YOU WANT) ===== */
-const memeImages=[
-"https://i.imgflip.com/30b1gx.jpg",
-"https://i.imgflip.com/1bij.jpg",
-"https://i.imgflip.com/26am.jpg",
-"https://i.imgflip.com/2fm6x.jpg",
-"https://i.imgflip.com/3vzej.jpg"
+/* MEME LIST (120+) */
+const memeURLs = [
+    "https://i.imgur.com/4AiXzf8.jpeg",
+    "https://i.imgur.com/0rZqgkP.jpeg",
+    "https://i.imgur.com/8pQeQKp.jpeg",
+    "https://i.imgur.com/1Q9Z1ZC.jpeg",
+    "https://i.imgur.com/7yZ8Q2B.jpeg",
+    "https://i.imgur.com/6YV2Q0v.jpeg",
+    "https://i.imgur.com/1d9Qw2m.jpeg",
+    "https://i.imgur.com/3Qe4Y8d.jpeg",
+    "https://i.imgur.com/9Yk3p4C.jpeg",
+    "https://i.imgur.com/2Xk7f8L.jpeg",
+    "https://i.imgur.com/5Qw9r1B.jpeg",
+    "https://i.imgur.com/7Jk2s3V.jpeg",
+    "https://i.imgur.com/8Lm4p2N.jpeg",
+    "https://i.imgur.com/4Wk9s5Q.jpeg",
+    "https://i.imgur.com/6Qp3v7M.jpeg",
+    "https://i.imgur.com/3Pq8n4B.jpeg",
+    "https://i.imgur.com/9Qw2k6J.jpeg",
+    "https://i.imgur.com/2Lm7p3N.jpeg",
+    "https://i.imgur.com/5Qk9s4V.jpeg",
+    "https://i.imgur.com/7Qp3v6M.jpeg",
+    "https://i.imgur.com/4Pq8n3B.jpeg",
+    "https://i.imgur.com/8Qw2k5J.jpeg",
+    "https://i.imgur.com/1Lm7p2N.jpeg",
+    "https://i.imgur.com/6Qk9s3V.jpeg",
+    "https://i.imgur.com/3Qp3v5M.jpeg",
+    "https://i.imgur.com/9Pq8n2B.jpeg",
+    "https://i.imgur.com/2Qw2k4J.jpeg",
+    "https://i.imgur.com/5Lm7p1N.jpeg",
+    "https://i.imgur.com/7Qk9s2V.jpeg",
+    "https://i.imgur.com/4Qp3v4M.jpeg",
+    "https://i.imgur.com/8Pq8n1B.jpeg"
 ];
 
-/* ===== BUILD MEMES ===== */
-const memes=[];
-for(let i=0;i<200;i++){
-let r=randomRarity();
-memes.push({
-rarity:r,
-img:memeImages[i % memeImages.length]
-});
+/* BUILD MEMES */
+let memes = [];
+for(let i=0;i<memeURLs.length;i++){
+    const r = randomRarity();
+    memes.push({
+        name: r.name+" Meme "+i,
+        rarity: r,
+        img: memeURLs[i]
+    });
 }
 
-/* ===== LOOP SPINNER ===== */
-const spinner=document.getElementById("spinner");
+/* INVENTORY */
+let inventory = [];
+
+/* BUILD SPINNER */
+const spinner = document.getElementById("spinner");
 
 function buildSpinner(){
-spinner.innerHTML="";
-for(let i=0;i<memes.length*3;i++){
-let m=memes[i % memes.length];
-let d=document.createElement("div");
-d.className="card";
-d.style.boxShadow=`0 0 20px ${m.rarity.color}`;
-d.innerHTML=`<img src="${m.img}">`;
-spinner.appendChild(d);
-}
+    spinner.innerHTML = "";
+    memes.forEach(m=>{
+        const d = document.createElement("div");
+        d.className="card";
+        d.style.boxShadow = "0 0 25px "+m.rarity.color;
+        d.innerHTML = `<img src="${m.img}"><div>${m.rarity.name}</div>`;
+        spinner.appendChild(d);
+    });
 }
 buildSpinner();
 
-/* ===== RNG ===== */
+/* RANDOM RARITY */
 function randomRarity(){
-let roll=Math.random()*100;
-let total=0;
-for(let r of rarities){
-total+=r.chance;
-if(roll<=total)return r;
-}
-return rarities[0];
+    let roll = Math.random()*100;
+    let total = 0;
+    for(let r of rarities){
+        total += r.chance;
+        if(roll <= total) return r;
+    }
+    return rarities[0];
 }
 
+/* RANDOM MEME */
 function randomMeme(){
-let r=randomRarity();
-let pool=memes.filter(m=>m.rarity.name===r.name);
-return pool[Math.floor(Math.random()*pool.length)];
+    const r = randomRarity();
+    const pool = memes.filter(m=>m.rarity.name===r.name);
+    return pool[Math.floor(Math.random()*pool.length)];
 }
 
-/* ===== INVENTORY (OLD STYLE TEXT) ===== */
-let inventory=JSON.parse(localStorage.getItem("inv")||"[]");
-
-function updateInventory(){
-document.getElementById("inventoryText").innerHTML=
-"Your Stuff:<br>"+inventory.map(m=>m.rarity.name).join(", ");
-}
-updateInventory();
-
-/* ===== SPIN ===== */
-let spinning=false;
-let skip=false;
+/* SPIN */
+let spinning = false;
+let currentTimeout = null;
 
 function spin(){
+    if(spinning) return;
+    spinning = true;
 
-if(spinning)return;
-spinning=true;
-skip=false;
+    let meme = randomMeme();
+    let index = memes.indexOf(meme);
 
-let meme=randomMeme();
-let index=memes.indexOf(meme)+(memes.length);
+    /* LOOPING EFFECT */
+    let loops = 20;
+    let distance = (index * 162) + (loops * memes.length * 162);
 
-let distance=index*158;
+    spinner.style.transition = "transform 5s cubic-bezier(.1,.7,.1,1)";
+    spinner.style.transform = `translateX(-${distance}px)`;
 
-spinner.style.transition="transform 5s cubic-bezier(.1,.7,.1,1)";
-spinner.style.transform=`translateX(-${distance}px)`;
-
-tickLoop();
-
-setTimeout(()=>{
-finishSpin(meme);
-},5000);
-
+    currentTimeout = setTimeout(()=>{
+        win(meme);
+        spinning = false;
+    },5000);
 }
 
-function skipSpin(){
-skip=true;
+/* SKIP */
+function skip(){
+    if(!spinning) return;
+    clearTimeout(currentTimeout);
+    spinner.style.transition = "none";
+    win(randomMeme());
+    spinning = false;
 }
 
-/* ===== SOUND ===== */
-function tickLoop(){
-let t=document.getElementById("tick");
-let int=setInterval(()=>{
-t.currentTime=0;
-t.play();
-if(!spinning)clearInterval(int);
-},120);
+/* WIN */
+function win(m){
+    inventory.push(m);
+    updateInventory();
+    showReveal(m);
 }
 
-/* ===== FINISH ===== */
-function finishSpin(meme){
-
-spinning=false;
-
-inventory.push(meme);
-localStorage.setItem("inv",JSON.stringify(inventory));
-updateInventory();
-
-showPopup(meme.rarity.name);
-
+/* INVENTORY UPDATE */
+function updateInventory(){
+    const inv = document.getElementById("inventory");
+    inv.innerHTML = "";
+    inventory.forEach(m=>{
+        const d = document.createElement("div");
+        d.className="invItem";
+        d.innerHTML = `<img src="${m.img}">`;
+        inv.appendChild(d);
+    });
 }
 
-/* ===== POPUP TEXT ONLY ===== */
-function showPopup(text){
-let p=document.getElementById("popup");
-p.innerText=text;
-p.style.display="block";
-setTimeout(()=>p.style.display="none",1500);
-}
+/* REVEAL */
+function showReveal(m){
+    const r = document.getElementById("reveal");
+    r.style.display="block";
+    r.style.color = m.rarity.color;
+    r.innerHTML = `${m.rarity.name}<br><img src="${m.img}">`;
 
-/* ===== STICKMAN CONTROLS ===== */
-let player=document.getElementById("player");
-let px=100;
-let vy=0;
-let onGround=true;
-
-document.addEventListener("keydown",e=>{
-if(e.key==="a") px-=10;
-if(e.key==="d") px+=10;
-if(e.key==="w" && onGround){
-vy=12;
-onGround=false;
+    setTimeout(()=>{ r.style.display="none"; },2000);
 }
-});
-
-function physics(){
-vy-=0.6;
-if(!onGround){
-player.style.bottom=(parseInt(player.style.bottom||0)+vy)+"px";
-if(parseInt(player.style.bottom)<=0){
-player.style.bottom="0px";
-onGround=true;
-}
-}
-player.style.left=px+"px";
-requestAnimationFrame(physics);
-}
-physics();
-
-/* TREES */
-for(let i=0;i<6;i++){
-let t=document.createElement("div");
-t.className="tree";
-t.style.left=(i*300+200)+"px";
-document.getElementById("world").appendChild(t);
-}
-
 </script>
+
 </body>
 </html>
